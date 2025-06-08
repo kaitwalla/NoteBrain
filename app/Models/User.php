@@ -38,11 +38,25 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'preferences' => 'array',
+    ];
+
+    public function preferences()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+        return $this->hasOne(UserPreference::class);
+    }
+
+    public function getArticlePreferences()
+    {
+        return $this->preferences?->article_preferences ?? [
+            'font_size' => 1.25,
+            'paragraph_spacing' => 2,
+            'content_width' => '4xl',
+            'font_family' => 'system',
+            'line_height' => 1.5,
         ];
     }
 }
