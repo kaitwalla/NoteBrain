@@ -55,7 +55,7 @@
                                 <span>{{ $article->site_name }}</span>
                                 <span class="mx-2">•</span>
                             @endif
-                            <span>{{ $article->created_at->format('F j, Y') }}</span>
+                            <span>{{ $article->created_at ? $article->created_at->format('F j, Y') : 'Unknown date' }}</span>
                         </div>
 
                         @if($article->summary)
@@ -102,6 +102,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Get all tab buttons
             const tabButtons = document.querySelectorAll('.tab-button');
+
+            // Only initialize tabs if they exist
+            if (tabButtons.length === 0) {
+                return; // Exit early if no tabs exist
+            }
 
             // Add click event listeners to each tab button
             tabButtons.forEach(button => {
