@@ -49,69 +49,7 @@
                         </h1>
                     </div>
                     <div class="flex items-center gap-2">
-                        @if(request()->routeIs('articles.show'))
-                            <button type="button" class="text-gray-500 hover:text-gray-700" title="Display Settings">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                            </button>
-                            @if(isset($article))
-                                <a href="{{ $article->url }}" target="_blank" rel="noopener noreferrer"
-                                   class="p-2 text-gray-400 hover:text-gray-500" title="View Original">
-                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
-                                    </svg>
-                                </a>
-                                <div class="relative">
-                                    <button class="p-2 text-gray-400 hover:text-gray-500" title="Change Status">
-                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                             stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                  d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
-                                        </svg>
-                                    </button>
-                                    <div id="status-menu"
-                                         class="hidden absolute right-0 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
-                                        @if($article->status === 'archived')
-                                            <button type="button"
-                                                    data-action="keep-unread"
-                                                    data-article-id="{{ $article->id }}"
-                                                    class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">
-                                                Keep Unread
-                                            </button>
-                                        @else
-                                            <form action="{{ route('articles.archive', $article) }}" method="POST"
-                                                  class="block"> @csrf
-                                                <button type="submit"
-                                                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">
-                                                    Archive
-                                                </button>
-                                            </form>
-                                        @endif
-                                        <form action="{{ route('articles.summarize', $article) }}" method="POST"
-                                              class="block"> @csrf
-                                            <button type="submit"
-                                                    class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">
-                                                Summarize
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('articles.destroy', $article) }}" method="POST"
-                                              class="block"
-                                              onsubmit="return confirm('Are you sure?');"> @csrf @method('DELETE')
-                                            <button type="submit"
-                                                    class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">
-                                                Delete
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            @endif
-                        @endif
+                        <!-- Empty div to maintain layout -->
                     </div>
                 </div>
             </div>
@@ -119,6 +57,76 @@
     @endauth
 
     {{ $slot }}
+
+    @if(request()->routeIs('articles.show') && isset($article))
+        <!-- Vertical Action Button Row -->
+        <div class="fixed top-1 right-0 left-auto flex flex-col space-y-2 z-50">
+            <button type="button"
+                    class="p-2 text-gray-500 hover:text-gray-700 bg-white rounded-full shadow-sm border border-gray-200"
+                    title="Display Settings">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+            </button>
+            <a href="{{ $article->url }}" target="_blank" rel="noopener noreferrer"
+               class="p-2 text-gray-500 hover:text-gray-700 bg-white rounded-full shadow-sm border border-gray-200"
+               title="View Original">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+                </svg>
+            </a>
+            <div class="relative">
+                <button
+                    class="p-2 text-gray-500 hover:text-gray-700 bg-white rounded-full shadow-sm border border-gray-200"
+                    title="Change Status">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
+                    </svg>
+                </button>
+                <div id="status-menu"
+                     class="hidden absolute right-0 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                    @if($article->status === 'archived')
+                        <button type="button"
+                                data-action="keep-unread"
+                                data-article-id="{{ $article->id }}"
+                                class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">
+                            Keep Unread
+                        </button>
+                    @else
+                        <form action="{{ route('articles.archive', $article) }}" method="POST"
+                              class="block"> @csrf
+                            <button type="submit"
+                                    class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">
+                                Archive
+                            </button>
+                        </form>
+                    @endif
+                    <form action="{{ route('articles.summarize', $article) }}" method="POST"
+                          class="block"> @csrf
+                        <button type="submit"
+                                class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">
+                            Summarize
+                        </button>
+                    </form>
+                    <form action="{{ route('articles.destroy', $article) }}" method="POST"
+                          class="block"
+                          onsubmit="return confirm('Are you sure?');"> @csrf @method('DELETE')
+                        <button type="submit"
+                                class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 @stack('scripts')
