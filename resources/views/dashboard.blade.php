@@ -51,7 +51,7 @@
                                 View all {{ $inboxCount }} articles
                             </a>
                         </div>
-                        
+
                         <div class="mt-4 space-y-4">
                             @forelse($recentArticles as $article)
                                 <div class="bg-white shadow rounded-lg p-4">
@@ -74,7 +74,7 @@
                                                     <span>{{ $article->site_name }}</span>
                                                     <span class="mx-2">•</span>
                                                 @endif
-                                                <span>{{ $article->created_at->diffForHumans() }}</span>
+                                                <span>{{ $article->created_at ? $article->created_at->diffForHumans() : 'Unknown date' }}</span>
                                             </div>
                                         </div>
                                         <div class="ml-4 flex-shrink-0 flex space-x-2">
@@ -107,7 +107,7 @@
                         </div>
                     </div>
 
-                
+
                 </div>
             </div>
         </div>
