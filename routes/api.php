@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\Api\ArticleController;
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\UserPreferenceController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,9 +17,18 @@ use App\Http\Controllers\API\UserPreferenceController;
 |
 */
 
-// Use web authentication for API routes
-Route::middleware('auth')->group(function () {
+// Public routes for authentication
+Route::post('/login', [AuthController::class, 'login']);
+
+// Protected routes with Sanctum authentication
+Route::middleware('auth:sanctum')->group(function () {
+    // Authentication routes
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
+
+    // Article routes
+    Route::post('/articles', [ArticleController::class, 'store']);
     Route::post('/articles/{article}/keep-unread', [ArticleController::class, 'keepUnread']);
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
