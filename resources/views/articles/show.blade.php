@@ -6,10 +6,10 @@
             </h2>
             <div class="flex space-x-4">
                 @if($article->status === 'unread')
-                    <form method="POST" action="{{ route('articles.read', $article) }}">
+                    <form method="POST" action="{{ route('articles.archive', $article) }}">
                         @csrf
                         <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
-                            Mark as Read
+                            Archive
                         </button>
                     </form>
                 @endif
@@ -58,9 +58,18 @@
                             <span>{{ $article->created_at->format('F j, Y') }}</span>
                         </div>
 
-                        <div class="article-content">
+                        <div class="prose max-w-none">
                             {!! $article->content !!}
                         </div>
+
+                        @if($article->summary)
+                            <div class="mt-12 border-t border-gray-200 pt-8">
+                                <h2 class="text-2xl font-bold text-gray-900 mb-4">Summary</h2>
+                                <div class="prose max-w-none bg-gray-50 p-6 rounded-lg">
+                                    {!! nl2br(e($article->summary)) !!}
+                                </div>
+                            </div>
+                        @endif
                     </article>
                 </div>
             </div>
@@ -232,97 +241,4 @@
     </style>
     @endpush
 
-    @push('scripts')
-    <script>
-        // Font size controls
-        function incrementFontSize() {
-            const article = document.querySelector('.prose');
-            const currentSize = parseFloat(window.getComputedStyle(article).fontSize);
-            const newSize = Math.min(currentSize + 2, 24);
-            article.style.fontSize = `${newSize}px`;
-            document.querySelector('.font-size-value').textContent = `${newSize}px`;
-        }
-
-        function decrementFontSize() {
-            const article = document.querySelector('.prose');
-            const currentSize = parseFloat(window.getComputedStyle(article).fontSize);
-            const newSize = Math.max(currentSize - 2, 12);
-            article.style.fontSize = `${newSize}px`;
-            document.querySelector('.font-size-value').textContent = `${newSize}px`;
-        }
-
-        // Spacing controls
-        function incrementSpacing() {
-            const article = document.querySelector('.prose');
-            const currentSpacing = parseFloat(window.getComputedStyle(article).lineHeight);
-            const newSpacing = Math.min(currentSpacing + 0.25, 2.5);
-            article.style.lineHeight = newSpacing.toString();
-            document.querySelector('.spacing-value').textContent = `${newSpacing.toFixed(2)}rem`;
-        }
-
-        function decrementSpacing() {
-            const article = document.querySelector('.prose');
-            const currentSpacing = parseFloat(window.getComputedStyle(article).lineHeight);
-            const newSpacing = Math.max(currentSpacing - 0.25, 1);
-            article.style.lineHeight = newSpacing.toString();
-            document.querySelector('.spacing-value').textContent = `${newSpacing.toFixed(2)}rem`;
-        }
-
-        // Line height controls
-        function incrementLineHeight() {
-            const article = document.querySelector('.prose');
-            const currentLineHeight = parseFloat(window.getComputedStyle(article).lineHeight);
-            const newLineHeight = Math.min(currentLineHeight + 0.1, 2);
-            article.style.lineHeight = newLineHeight.toString();
-            document.querySelector('.line-height-value').textContent = `${newLineHeight.toFixed(1)}x`;
-        }
-
-        function decrementLineHeight() {
-            const article = document.querySelector('.prose');
-            const currentLineHeight = parseFloat(window.getComputedStyle(article).lineHeight);
-            const newLineHeight = Math.max(currentLineHeight - 0.1, 1);
-            article.style.lineHeight = newLineHeight.toString();
-            document.querySelector('.line-height-value').textContent = `${newLineHeight.toFixed(1)}x`;
-        }
-
-        // Content width controls
-        document.getElementById('content-width')?.addEventListener('change', function(e) {
-            const container = document.querySelector('.max-w-7xl');
-            container.className = 'mx-auto sm:px-6 lg:px-8';
-            container.classList.add(`max-w-${e.target.value}`);
-        });
-
-        // Reset preferences
-        document.getElementById('reset-preferences')?.addEventListener('click', function() {
-            const article = document.querySelector('.prose');
-            article.style.fontSize = '16px';
-            article.style.lineHeight = '1.5';
-            document.querySelector('.font-size-value').textContent = '16px';
-            document.querySelector('.spacing-value').textContent = '1.5rem';
-            document.querySelector('.line-height-value').textContent = '1.5x';
-            document.getElementById('content-width').value = '4xl';
-            const container = document.querySelector('.max-w-7xl');
-            container.className = 'mx-auto sm:px-6 lg:px-8 max-w-4xl';
-        });
-
-        // Initialize display values
-        document.addEventListener('DOMContentLoaded', function() {
-            const article = document.querySelector('.prose');
-            const fontSize = parseFloat(window.getComputedStyle(article).fontSize);
-            const lineHeight = parseFloat(window.getComputedStyle(article).lineHeight);
-            
-            document.querySelector('.font-size-value').textContent = `${fontSize}px`;
-            document.querySelector('.spacing-value').textContent = `${lineHeight.toFixed(2)}rem`;
-            document.querySelector('.line-height-value').textContent = `${lineHeight.toFixed(1)}x`;
-        });
-
-        // Move the popover to the body
-        document.addEventListener('DOMContentLoaded', function() {
-            const popover = document.getElementById('settings-popover');
-            if (popover) {
-                document.body.appendChild(popover);
-            }
-        });
-    </script>
-    @endpush
 </x-app-layout> 

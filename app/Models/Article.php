@@ -12,23 +12,27 @@ class Article extends Model
 {
     use HasFactory;
 
+    const STATUS_INBOX = 'inbox';
+    const STATUS_ARCHIVED = 'archived';
+    const STATUS_DELETED = 'deleted';
+    const STATUS_SUMMARIZE = 'summarize';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
-        'url',
         'title',
         'content',
-        'excerpt',
-        'featured_image',
+        'url',
+        'status',
         'author',
         'site_name',
-        'status',
-        'read_at',
-        'archived_at',
+        'featured_image',
+        'excerpt',
+        'summary',
+        'user_id',
     ];
 
     /**
@@ -37,8 +41,8 @@ class Article extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'read_at' => 'datetime',
-        'archived_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -50,34 +54,12 @@ class Article extends Model
     }
 
     /**
-     * Mark the article as read.
-     */
-    public function markAsRead(): void
-    {
-        $this->update([
-            'status' => 'read',
-            'read_at' => now(),
-        ]);
-    }
-
-    /**
-     * Mark the article as unread.
-     */
-    public function markAsUnread(): void
-    {
-        $this->update([
-            'status' => 'unread',
-            'read_at' => null,
-        ]);
-    }
-
-    /**
      * Archive the article.
      */
     public function archive(): void
     {
         $this->update([
-            'status' => 'archived',
+            'status' => self::STATUS_ARCHIVED,
             'archived_at' => now(),
         ]);
     }
@@ -88,7 +70,7 @@ class Article extends Model
     public function moveToInbox(): void
     {
         $this->update([
-            'status' => 'inbox',
+            'status' => self::STATUS_INBOX,
             'archived_at' => null,
         ]);
     }
@@ -102,27 +84,11 @@ class Article extends Model
     }
 
     /**
-     * Scope a query to only include unread articles.
-     */
-    public function scopeUnread($query)
-    {
-        return $query->where('status', 'unread');
-    }
-
-    /**
-     * Scope a query to only include read articles.
-     */
-    public function scopeRead($query)
-    {
-        return $query->where('status', 'read');
-    }
-
-    /**
      * Scope a query to only include archived articles.
      */
     public function scopeArchived($query)
     {
-        return $query->where('status', 'archived');
+        return $query->where('status', self::STATUS_ARCHIVED);
     }
 
     /**
@@ -130,7 +96,7 @@ class Article extends Model
      */
     public function scopeInbox($query)
     {
-        return $query->where('status', 'inbox');
+        return $query->where('status', self::STATUS_INBOX);
     }
 
     public function tags(): BelongsToMany
@@ -141,5 +107,15 @@ class Article extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ArticleImage::class);
+    }
+
+    public static function getStatuses()
+    {
+        return [
+            self::STATUS_INBOX => 'Inbox',
+            self::STATUS_ARCHIVED => 'Archived',
+            self::STATUS_DELETED => 'Deleted',
+            self::STATUS_SUMMARIZE => 'Summarized',
+        ];
     }
 }

@@ -18,9 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
-Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
@@ -32,10 +30,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
     Route::post('/articles/{article}/archive', [ArticleController::class, 'archive'])->name('articles.archive');
     Route::post('/articles/{article}/inbox', [ArticleController::class, 'inbox'])->name('articles.inbox');
-    Route::post('/articles/{article}/read', [ArticleController::class, 'read'])->name('articles.read');
     Route::post('/articles/{article}/restore', [ArticleController::class, 'restore'])->name('articles.restore');
-
+    Route::post('/articles/{article}/summarize', [ArticleController::class, 'summarize'])->name('articles.summarize');
+    Route::post('/articles/{article}/keep-unread', [ArticleController::class, 'keepUnread']);
     Route::post('/user/preferences', [UserPreferenceController::class, 'update'])->name('preferences.update');
+    Route::get('/user/preferences', [UserPreferenceController::class, 'show'])->name('preferences.show');
 });
 
 require __DIR__.'/auth.php';

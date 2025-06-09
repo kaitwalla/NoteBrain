@@ -20,6 +20,7 @@ return new class extends Migration
                 'content_width' => '4xl',
                 'font_family' => 'system',
                 'line_height' => 1.5,
+                'articles_per_page' => 20,
             ]));
             $table->timestamps();
         });

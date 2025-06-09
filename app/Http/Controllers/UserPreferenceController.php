@@ -11,6 +11,7 @@ class UserPreferenceController extends Controller
     public function update(Request $request)
     {
         try {
+            Log::info('Update method called for user preferences: ' . json_encode($request->all()));
             $user = $request->user();
             if (!$user) {
                 Log::error('No authenticated user found');
@@ -42,5 +43,18 @@ class UserPreferenceController extends Controller
             Log::error($e->getTraceAsString());
             return response()->json(['error' => 'Internal server error'], 500);
         }
+    }
+
+    public function show()
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        $preferences = $user->getArticlePreferences();
+        if ($preferences) {
+            return response()->json($preferences);
+        }
+        return response()->json(['error' => 'Preferences not found'], 404);
     }
 } 

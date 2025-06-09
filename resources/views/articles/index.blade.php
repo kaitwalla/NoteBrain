@@ -14,9 +14,31 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    <!-- Tabs -->
+                    <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                            <a href="{{ route('articles.index', ['status' => 'inbox']) }}" 
+                               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm {{ $currentStatus === 'inbox' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                                Inbox
+                                <span class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs">{{ $inboxCount }}</span>
+                            </a>
+                            <a href="{{ route('articles.index', ['status' => 'summarize']) }}" 
+                               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm {{ $currentStatus === 'summarize' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                                Summarized
+                                <span class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs">{{ $summarizeCount }}</span>
+                            </a>
+                            <a href="{{ route('articles.index', ['status' => 'archived']) }}" 
+                               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm {{ $currentStatus === 'archived' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                                Archived
+                                <span class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs">{{ $archivedCount }}</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Articles List -->
                     @if($articles->isEmpty())
                         <div class="text-center py-12">
-                            <h3 class="text-lg font-medium text-gray-900">No articles yet</h3>
+                            <h3 class="text-lg font-medium text-gray-900">No articles in {{ ucfirst($currentStatus) }}</h3>
                             <p class="mt-1 text-sm text-gray-500">Get started by saving your first article.</p>
                             <div class="mt-6">
                                 <a href="{{ route('articles.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
@@ -50,19 +72,30 @@
                                         </div>
                                     </div>
                                     <div class="ml-4 flex-shrink-0 flex space-x-2">
-                                        @if($article->status === 'unread')
-                                            <form method="POST" action="{{ route('articles.read', $article) }}">
+                                        @if($article->status === 'inbox')
+                                            <form method="POST" action="{{ route('articles.summarize', $article) }}">
                                                 @csrf
                                                 <button type="submit" class="text-sm text-gray-600 hover:text-gray-900">
-                                                    Mark as Read
+                                                    Mark as Summarized
                                                 </button>
                                             </form>
-                                        @endif
-                                        @if($article->status !== 'archived')
                                             <form method="POST" action="{{ route('articles.archive', $article) }}">
                                                 @csrf
                                                 <button type="submit" class="text-sm text-gray-600 hover:text-gray-900">
                                                     Archive
+                                                </button>
+                                            </form>
+                                        @elseif($article->status === 'summarize')
+                                            <form method="POST" action="{{ route('articles.archive', $article) }}">
+                                                @csrf
+                                                <button type="submit" class="text-sm text-gray-600 hover:text-gray-900">
+                                                    Archive
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{{ route('articles.inbox', $article) }}">
+                                                @csrf
+                                                <button type="submit" class="text-sm text-gray-600 hover:text-gray-900">
+                                                    Move to Inbox
                                                 </button>
                                             </form>
                                         @else
@@ -79,7 +112,7 @@
                         </div>
 
                         <div class="mt-6">
-                            {{ $articles->links() }}
+                            {{ $articles->appends(['status' => $currentStatus])->links() }}
                         </div>
                     @endif
                 </div>

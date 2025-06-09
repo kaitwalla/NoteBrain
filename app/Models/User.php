@@ -44,6 +44,8 @@ class User extends Authenticatable
         'preferences' => 'array',
     ];
 
+    protected $with = ['preferences'];
+
     public function preferences()
     {
         return $this->hasOne(UserPreference::class);

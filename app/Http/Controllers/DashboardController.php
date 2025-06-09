@@ -13,29 +13,26 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
-
-        $unreadCount = Article::where('user_id', $user->id)
-            ->whereIn('status', ['unread', 'inbox'])
+        $user = auth()->user();
+        $inboxCount = Article::where('user_id', $user->id)
+            ->where('status', 'inbox')
             ->count();
-
-        $readCount = Article::where('user_id', $user->id)
-            ->where('status', 'read')
-            ->count();
-
         $archivedCount = Article::where('user_id', $user->id)
             ->where('status', 'archived')
             ->count();
-
+        $summarizeCount = Article::where('user_id', $user->id)
+            ->where('status', 'summarize')
+            ->count();
         $recentArticles = Article::where('user_id', $user->id)
-            ->latest()
+            ->where('status', 'inbox')
+            ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
         return view('dashboard', compact(
-            'unreadCount',
-            'readCount',
+            'inboxCount',
             'archivedCount',
+            'summarizeCount',
             'recentArticles'
         ));
     }
