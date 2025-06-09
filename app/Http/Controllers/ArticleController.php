@@ -27,17 +27,15 @@ class ArticleController extends Controller
         $perPage = $request->user()->preferences->article_preferences['articles_per_page'] ?? 20;
         $status = $request->get('status', 'inbox');
 
-        $query = Article::query()
-            ->when($status === 'inbox', function ($query) {
-                return $query->where('status', 'inbox');
-            })
-            ->when($status === 'archived', function ($query) {
-                return $query->where('status', 'archived');
-            })
-            ->when($status === 'summarize', function ($query) {
-                return $query->where('status', 'summarize');
-            })
-            ->orderBy('created_at', 'desc');
+        $query = Article::query();
+
+        if ($status === 'inbox') {
+            $query->where('status', 'inbox');
+        } elseif ($status === 'archived') {
+            $query->where('status', 'archived');
+        }
+
+        $query->orderBy('created_at', 'desc');
 
         $articles = $query->paginate($perPage);
 
@@ -46,7 +44,6 @@ class ArticleController extends Controller
             'currentStatus' => $status,
             'inboxCount' => Article::where('status', 'inbox')->count(),
             'archivedCount' => Article::where('status', 'archived')->count(),
-            'summarizeCount' => Article::where('status', 'summarize')->count(),
         ]);
     }
 
@@ -80,7 +77,7 @@ class ArticleController extends Controller
 
         $article = new Article([
             'url' => $validated['url'],
-            'status' => $request->boolean('summarize') ? Article::STATUS_SUMMARIZE : Article::STATUS_INBOX,
+            'status' => Article::STATUS_INBOX,
             'user_id' => $userId,
             'title' => $metadata['title'] ?? 'Untitled Article',
             'content' => $metadata['content'] ?? '',
@@ -152,18 +149,16 @@ class ArticleController extends Controller
     {
         if (!$article->summary) {
             $article->update([
-                'status' => Article::STATUS_SUMMARIZE,
                 'summarized_at' => now(),
                 'summary' => $this->summarizer->summarize($article),
             ]);
         } else {
             $article->update([
-                'status' => Article::STATUS_SUMMARIZE,
                 'summarized_at' => now(),
             ]);
         }
 
-        return redirect()->route('articles.index')->with('success', 'Article marked for summarization.');
+        return redirect()->route('articles.index')->with('success', 'Article summarized successfully.');
     }
 
     /**
@@ -173,24 +168,10 @@ class ArticleController extends Controller
     {
         $this->authorize('view', $article);
 
-        // Archive the article if it's not already archived
-        if ($article->status !== 'archived') {
-            $article->archive();
-        }
-
         // Share the article with the layout
         view()->share('article', $article);
 
         return view('articles.show', compact('article'));
-    }
-
-    /**
-     * Archive an article.
-     */
-    public function archive(Article $article)
-    {
-        $article->archive();
-        return redirect()->back()->with('success', 'Article archived.');
     }
 
     /**
@@ -222,6 +203,15 @@ class ArticleController extends Controller
         $article->archive();
 
         return back()->with('success', 'Article archived.');
+    }
+
+    /**
+     * Archive an article.
+     */
+    public function archive(Article $article)
+    {
+        $article->archive();
+        return redirect()->back()->with('success', 'Article archived.');
     }
 
     public function destroy(Article $article)

@@ -15,7 +15,6 @@ class Article extends Model
     const STATUS_INBOX = 'inbox';
     const STATUS_ARCHIVED = 'archived';
     const STATUS_DELETED = 'deleted';
-    const STATUS_SUMMARIZE = 'summarize';
 
     /**
      * The attributes that are mass assignable.
@@ -118,7 +117,6 @@ class Article extends Model
             self::STATUS_INBOX => 'Inbox',
             self::STATUS_ARCHIVED => 'Archived',
             self::STATUS_DELETED => 'Deleted',
-            self::STATUS_SUMMARIZE => 'Summarized',
         ];
     }
 }

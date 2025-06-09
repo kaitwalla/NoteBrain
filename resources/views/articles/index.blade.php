@@ -22,11 +22,6 @@
                                 Inbox
                                 <span class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs">{{ $inboxCount }}</span>
                             </a>
-                            <a href="{{ route('articles.index', ['status' => 'summarize']) }}"
-                               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm {{ $currentStatus === 'summarize' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                                Summarized
-                                <span class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs">{{ $summarizeCount }}</span>
-                            </a>
                             <a href="{{ route('articles.index', ['status' => 'archived']) }}"
                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm {{ $currentStatus === 'archived' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                                 Archived
@@ -73,29 +68,18 @@
                                     </div>
                                     <div class="ml-4 flex-shrink-0 flex space-x-2">
                                         @if($article->status === 'inbox')
-                                            <form method="POST" action="{{ route('articles.summarize', $article) }}">
-                                                @csrf
-                                                <button type="submit" class="text-sm text-gray-600 hover:text-gray-900">
-                                                    Mark as Summarized
-                                                </button>
-                                            </form>
+                                            @if(!$article->summary)
+                                                <form method="POST" action="{{ route('articles.summarize', $article) }}">
+                                                    @csrf
+                                                    <button type="submit" class="text-sm text-gray-600 hover:text-gray-900">
+                                                        Summarize
+                                                    </button>
+                                                </form>
+                                            @endif
                                             <form method="POST" action="{{ route('articles.archive', $article) }}">
                                                 @csrf
                                                 <button type="submit" class="text-sm text-gray-600 hover:text-gray-900">
                                                     Archive
-                                                </button>
-                                            </form>
-                                        @elseif($article->status === 'summarize')
-                                            <form method="POST" action="{{ route('articles.archive', $article) }}">
-                                                @csrf
-                                                <button type="submit" class="text-sm text-gray-600 hover:text-gray-900">
-                                                    Archive
-                                                </button>
-                                            </form>
-                                            <form method="POST" action="{{ route('articles.inbox', $article) }}">
-                                                @csrf
-                                                <button type="submit" class="text-sm text-gray-600 hover:text-gray-900">
-                                                    Move to Inbox
                                                 </button>
                                             </form>
                                         @else
