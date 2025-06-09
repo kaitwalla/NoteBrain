@@ -52,6 +52,8 @@ The following routes are protected and require authentication:
 - `GET /api/user`: Get the authenticated user's information
 - `POST /api/articles`: Create a new article
 - `POST /api/articles/{article}/keep-unread`: Mark an article as unread
+- `POST /api/articles/{article}/read`: Mark an article as read
+- `POST /api/articles/{article}/summarize`: Summarize an article
 
 ## Revoking a Token
 

@@ -88,6 +88,35 @@ class ArticleController extends Controller
         ]);
     }
 
+    public function read(Article $article)
+    {
+        $article->archive();
+
+        return response()->json([
+            'message' => 'Article marked as read',
+            'article' => $article
+        ]);
+    }
+
+    public function summarize(Article $article)
+    {
+        if (!$article->summary) {
+            $article->update([
+                'summarized_at' => now(),
+                'summary' => $this->summarizer->summarize($article),
+            ]);
+        } else {
+            $article->update([
+                'summarized_at' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Article summarized successfully',
+            'article' => $article
+        ]);
+    }
+
     private function fetchArticleMetadata(string $url): array
     {
         try {
