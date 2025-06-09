@@ -17,17 +17,17 @@
                     <!-- Tabs -->
                     <div class="border-b border-gray-200">
                         <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                            <a href="{{ route('articles.index', ['status' => 'inbox']) }}" 
+                            <a href="{{ route('articles.index', ['status' => 'inbox']) }}"
                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm {{ $currentStatus === 'inbox' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                                 Inbox
                                 <span class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs">{{ $inboxCount }}</span>
                             </a>
-                            <a href="{{ route('articles.index', ['status' => 'summarize']) }}" 
+                            <a href="{{ route('articles.index', ['status' => 'summarize']) }}"
                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm {{ $currentStatus === 'summarize' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                                 Summarized
                                 <span class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs">{{ $summarizeCount }}</span>
                             </a>
-                            <a href="{{ route('articles.index', ['status' => 'archived']) }}" 
+                            <a href="{{ route('articles.index', ['status' => 'archived']) }}"
                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm {{ $currentStatus === 'archived' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                                 Archived
                                 <span class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs">{{ $archivedCount }}</span>
@@ -68,7 +68,7 @@
                                                 <span>{{ $article->site_name }}</span>
                                                 <span class="mx-2">•</span>
                                             @endif
-                                            <span>{{ $article->created_at->diffForHumans() }}</span>
+                                            <span>{{ $article->created_at ? $article->created_at->diffForHumans() : 'Unknown date' }}</span>
                                         </div>
                                     </div>
                                     <div class="ml-4 flex-shrink-0 flex space-x-2">
@@ -119,4 +119,4 @@
             </div>
         </div>
     </div>
-</x-app-layout> 
+</x-app-layout>

@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserPreferenceController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,9 +32,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/articles/{article}/inbox', [ArticleController::class, 'inbox'])->name('articles.inbox');
     Route::post('/articles/{article}/restore', [ArticleController::class, 'restore'])->name('articles.restore');
     Route::post('/articles/{article}/summarize', [ArticleController::class, 'summarize'])->name('articles.summarize');
-    Route::post('/articles/{article}/keep-unread', [ArticleController::class, 'keepUnread']);
+    Route::post('/articles/{article}/keep-unread', [ArticleController::class, 'keepUnread'])->name('articles.keep-unread');
     Route::post('/user/preferences', [UserPreferenceController::class, 'update'])->name('preferences.update');
     Route::get('/user/preferences', [UserPreferenceController::class, 'show'])->name('preferences.show');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

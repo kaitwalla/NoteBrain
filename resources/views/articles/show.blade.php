@@ -58,16 +58,37 @@
                             <span>{{ $article->created_at->format('F j, Y') }}</span>
                         </div>
 
-                        <div class="prose max-w-none">
-                            {!! $article->content !!}
-                        </div>
-
                         @if($article->summary)
-                            <div class="mt-12 border-t border-gray-200 pt-8">
-                                <h2 class="text-2xl font-bold text-gray-900 mb-4">Summary</h2>
-                                <div class="prose max-w-none bg-gray-50 p-6 rounded-lg">
+                            <!-- Tab Navigation -->
+                            <div class="border-b border-gray-200 mb-6">
+                                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                                    <button type="button"
+                                            class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-indigo-500 text-indigo-600"
+                                            data-tab="summary">
+                                        Summary
+                                    </button>
+                                    <button type="button"
+                                            class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                            data-tab="original">
+                                        Original Content
+                                    </button>
+                                </nav>
+                            </div>
+
+                            <!-- Tab Content -->
+                            <div class="tab-content" id="summary-tab">
+                                <div class="prose max-w-none">
                                     {!! nl2br(e($article->summary)) !!}
                                 </div>
+                            </div>
+                            <div class="tab-content hidden" id="original-tab">
+                                <div class="prose max-w-none">
+                                    {!! $article->content !!}
+                                </div>
+                            </div>
+                        @else
+                            <div class="prose max-w-none">
+                                {!! $article->content !!}
                             </div>
                         @endif
                     </article>
@@ -75,6 +96,45 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all tab buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+
+            // Add click event listeners to each tab button
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+
+            // Function to switch tabs
+            function switchTab(tabId) {
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+
+                // Show the selected tab content
+                document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+
+                // Update tab button styles
+                tabButtons.forEach(button => {
+                    if (button.getAttribute('data-tab') === tabId) {
+                        button.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                        button.classList.add('border-indigo-500', 'text-indigo-600');
+                    } else {
+                        button.classList.remove('border-indigo-500', 'text-indigo-600');
+                        button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                    }
+                });
+            }
+        });
+    </script>
+    @endpush
 
     @push('styles')
     <style>
@@ -241,4 +301,4 @@
     </style>
     @endpush
 
-</x-app-layout> 
+</x-app-layout>

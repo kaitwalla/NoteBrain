@@ -32,6 +32,9 @@ class Article extends Model
         'featured_image',
         'excerpt',
         'summary',
+        'summarized_at',
+        'read_at',
+        'archived_at',
         'user_id',
     ];
 

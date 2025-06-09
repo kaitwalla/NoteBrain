@@ -10,7 +10,7 @@ class ArticleSummarizer
     public function summarize(Article $article): string
     {
         $response = OpenAI::chat()->create([
-            'model' => 'gpt-4',
+            'model' => 'o4-mini',
             'messages' => [
                 [
                     'role' => 'system',
@@ -21,10 +21,9 @@ class ArticleSummarizer
                     'content' => "Please provide a comprehensive summary of this article:\n\nTitle: {$article->title}\n\nContent: {$article->content}"
                 ]
             ],
-            'temperature' => 0.7,
-            'max_tokens' => 2000,
+            'max_completion_tokens' => 4000,
         ]);
 
         return $response->choices[0]->message->content;
     }
-} 
+}

@@ -17,4 +17,9 @@ use App\Http\Controllers\API\UserPreferenceController;
 |
 */
 
-require __DIR__.'/auth.php'; 
+// Use web authentication for API routes
+Route::middleware('auth')->group(function () {
+    Route::post('/articles/{article}/keep-unread', [ArticleController::class, 'keepUnread']);
+});
+
+require __DIR__.'/auth.php';

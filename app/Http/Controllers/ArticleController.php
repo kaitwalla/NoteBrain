@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\SaveArticle;
 use App\Models\Article;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use App\Services\ArticleSummarizer;
-use fivefilters\Readability\Readability;
 use fivefilters\Readability\Configuration;
 use fivefilters\Readability\ParseException;
+use fivefilters\Readability\Readability;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ArticleController extends Controller
 {
@@ -139,42 +137,6 @@ class ArticleController extends Controller
         }
     }
 
-    /**
-     * Display the specified article.
-     */
-    public function show(Article $article)
-    {
-        $this->authorize('view', $article);
-        
-        // Archive the article if it's not already archived
-        if ($article->status !== 'archived') {
-            $article->archive();
-        }
-        
-        // Share the article with the layout
-        view()->share('article', $article);
-        
-        return view('articles.show', compact('article'));
-    }
-
-    /**
-     * Archive an article.
-     */
-    public function archive(Article $article)
-    {
-        $article->archive();
-        return redirect()->back()->with('success', 'Article archived.');
-    }
-
-    /**
-     * Move an article to inbox.
-     */
-    public function inbox(Article $article)
-    {
-        $article->moveToInbox();
-        return redirect()->back()->with('success', 'Article moved to inbox.');
-    }
-
     public function update(Request $request, Article $article)
     {
         $validated = $request->validate([
@@ -204,12 +166,61 @@ class ArticleController extends Controller
         return redirect()->route('articles.index')->with('success', 'Article marked for summarization.');
     }
 
+    /**
+     * Display the specified article.
+     */
+    public function show(Article $article)
+    {
+        $this->authorize('view', $article);
+
+        // Archive the article if it's not already archived
+        if ($article->status !== 'archived') {
+            $article->archive();
+        }
+
+        // Share the article with the layout
+        view()->share('article', $article);
+
+        return view('articles.show', compact('article'));
+    }
+
+    /**
+     * Archive an article.
+     */
+    public function archive(Article $article)
+    {
+        $article->archive();
+        return redirect()->back()->with('success', 'Article archived.');
+    }
+
+    /**
+     * Move an article to inbox.
+     */
+    public function inbox(Article $article)
+    {
+        $article->moveToInbox();
+        return redirect()->back()->with('success', 'Article moved to inbox.');
+    }
+
+    public function keepUnread(Article $article)
+    {
+        $article->update([
+            'status' => Article::STATUS_INBOX,
+            'read_at' => null,
+        ]);
+
+        return response()->json([
+            'message' => 'Article kept unread',
+            'article' => $article
+        ]);
+    }
+
     public function read(Article $article)
     {
         $this->authorize('update', $article);
-        
+
         $article->archive();
-        
+
         return back()->with('success', 'Article archived.');
     }
 
@@ -219,4 +230,4 @@ class ArticleController extends Controller
         $article->delete();
         return redirect()->route('articles.index')->with('success', 'Article deleted successfully.');
     }
-} 
+}
