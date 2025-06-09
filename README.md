@@ -1,61 +1,136 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# NoteBrain
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+NoteBrain is a Laravel-based web application for collecting, organizing, and managing articles and notes. It features a
+smooth user interface built with Tailwind CSS and Vite, article summarization, user preferences, and powerful APIs for
+integrations and automation.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Authentication & User Management**
+    - Secure login and registration using Laravel Sanctum and built-in auth scaffolding
+    - Edit, update, and delete your user profile
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Article Management**
+    - Create, read, update, delete, archive, and restore articles
+    - Rich dashboard to manage all your articles
+    - Keep articles unread, mark as read, or restore to inbox
+    - Article summarization feature
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **User Preferences**
+    - Customize user-specific settings
 
-## Learning Laravel
+- **API Endpoints**
+    - RESTful API for handling articles and user accounts
+    - Includes authentication routes compatible with frontend or other services
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Modern Frontend**
+    - Built with Tailwind CSS, Alpine.js, and Vite for fast, modern performance
+    - Responsive design for desktop and mobile
+    - Minimal, distraction-free reading experience: on article pages, the navigation bar is hidden and the back button
+      becomes a floating button
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Project Structure
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **`app/Http/Controllers/`**: Laravel controllers for API, articles, dashboard, profiles, user preferences
+- **`app/Models/`**: Eloquent models, including `Article`, `User`, and user/article preference relationships
+- **`resources/views/`**: Blade templates for articles, authentication, dashboard, components, and layouts
+- **`routes/`**:
+    - `web.php`: Web application routes (authenticated article and user flows)
+    - `api.php`: REST API endpoints
 
-## Laravel Sponsors
+## Getting Started
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Prerequisites
 
-### Premium Partners
+- PHP 8.2+
+- Composer
+- Node.js with npm
+- (Optional but recommended) SQLite or another supported database
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Installation
 
-## Contributing
+1. **Clone the Repository**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```textmate
+git clone <your-repo-url>
+   cd notebrain
+```
 
-## Code of Conduct
+2. **Install PHP Dependencies**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```textmate
+composer install
+```
 
-## Security Vulnerabilities
+3. **Install Node Modules**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```textmate
+npm install
+```
 
-## License
+4. **Copy and Configure Environment**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```textmate
+cp .env.example .env
+   php artisan key:generate
+```
+
+Edit `.env` for your database and mail settings if needed.
+
+5. **Run Migrations**
+
+```textmate
+php artisan migrate
+```
+
+6. **Build Frontend Assets**
+
+```textmate
+npm run build
+```
+
+7. **Serve the Application**
+
+```textmate
+php artisan serve
+```
+
+By default, this will launch at [http://localhost:8000](http://localhost:8000)
+
+### Development
+
+To automatically recompile assets during development:
+
+```textmate
+npm run dev
+```
+
+## Testing
+
+To run the tests:
+
+```textmate
+phpunit
+```
+
+or
+
+```textmate
+php artisan test
+```
+
+## API Usage
+
+- Authentication: `POST /api/login` (see routes/api.php for full endpoints)
+- Protected routes require a Bearer token from Sanctum authentication
+
+See `README-API-AUTH.md` for API-specific details.
+
+## Customization & Contribution
+
+- The UI is easily customizable with Tailwind CSS (`resources/css/app.css`)
+- JavaScript is organized in `resources/js`
+- Article processing logic (including summarization) lives in `app/Services/ArticleSummarizer.php`
+- Follow standard Laravel conventions for adding new features or modifying models/controllers
+
+Contributions and bug reports are welcome!
