@@ -107,7 +107,21 @@ npm run dev
 
 ## Testing
 
+The application uses a local SQLite database for testing. The testing database is automatically created and migrated before running tests.
+
 To run the tests:
+
+```textmate
+composer test
+```
+
+This will:
+1. Clear the configuration cache
+2. Create a testing SQLite database if it doesn't exist
+3. Run migrations on the testing database
+4. Run the tests
+
+You can also run tests directly with:
 
 ```textmate
 phpunit
@@ -118,6 +132,8 @@ or
 ```textmate
 php artisan test
 ```
+
+These methods will also automatically set up the testing database, as the bootstrap file in the tests directory will create the database and run migrations before the tests.
 
 ## API Usage
 

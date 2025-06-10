@@ -59,6 +59,9 @@
         ],
         "test": [
             "@php artisan config:clear --ansi",
+            "@php -r \"is_dir('database') || mkdir('database');\"",
+            "@php -r \"file_exists('database/testing.sqlite') || touch('database/testing.sqlite');\"",
+            "@php artisan migrate --env=testing --database=sqlite --force",
             "@php artisan test"
         ]
     },

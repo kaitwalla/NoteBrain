@@ -33,4 +33,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/articles/{article}/summarize', [ArticleController::class, 'summarize']);
 });
 
-require __DIR__ . '/auth.php';
+// API routes don't need web authentication routes
+// require __DIR__ . '/auth.php';
