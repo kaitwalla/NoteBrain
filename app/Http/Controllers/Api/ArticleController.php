@@ -10,7 +10,6 @@ use fivefilters\Readability\Configuration;
 use fivefilters\Readability\ParseException;
 use fivefilters\Readability\Readability;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class ArticleController extends Controller
 {
@@ -84,48 +83,6 @@ class ArticleController extends Controller
         ], 201);
     }
 
-    public function keepUnread(Article $article)
-    {
-        $article->update([
-            'status' => Article::STATUS_INBOX,
-            'read_at' => null,
-        ]);
-
-        return response()->json([
-            'message' => 'Article kept unread',
-            'article' => $article
-        ]);
-    }
-
-    public function read(Article $article)
-    {
-        $article->archive();
-
-        return response()->json([
-            'message' => 'Article marked as read',
-            'article' => $article
-        ]);
-    }
-
-    public function summarize(Article $article)
-    {
-        if (!$article->summary) {
-            $article->update([
-                'summarized_at' => now(),
-                'summary' => $this->summarizer->summarize($article),
-            ]);
-        } else {
-            $article->update([
-                'summarized_at' => now(),
-            ]);
-        }
-
-        return response()->json([
-            'message' => 'Article summarized successfully',
-            'article' => $article
-        ]);
-    }
-
     private function fetchArticleMetadata(string $url): array
     {
         try {
@@ -152,5 +109,47 @@ class ArticleController extends Controller
             \Log::error('Failed to fetch article metadata: ' . $e->getMessage());
             return [];
         }
+    }
+
+    public function summarize(Article $article)
+    {
+        if (!$article->summary) {
+            $article->update([
+                'summarized_at' => now(),
+                'summary' => $this->summarizer->summarize($article),
+            ]);
+        } else {
+            $article->update([
+                'summarized_at' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Article summarized successfully',
+            'article' => $article
+        ]);
+    }
+
+    public function keepUnread(Article $article)
+    {
+        $article->update([
+            'status' => Article::STATUS_INBOX,
+            'read_at' => null,
+        ]);
+
+        return response()->json([
+            'message' => 'Article kept unread',
+            'article' => $article
+        ]);
+    }
+
+    public function read(Article $article)
+    {
+        $article->archive();
+
+        return response()->json([
+            'message' => 'Article marked as read',
+            'article' => $article
+        ]);
     }
 }

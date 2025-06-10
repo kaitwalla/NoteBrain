@@ -16,8 +16,17 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+        $folderName = null;
+
+        if ($user->hasGoogleDriveToken() && $user->google_drive_folder_id) {
+            $googleDriveController = new GoogleDriveController();
+            $folderName = $googleDriveController->getCurrentFolderName();
+        }
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
+            'googleDriveFolderName' => $folderName,
         ]);
     }
 

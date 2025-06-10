@@ -3,36 +3,145 @@
 namespace App\Services;
 
 use App\Models\Article;
+use App\Models\User;
 use Google\Client;
 use Google\Service\Drive;
 use Google\Service\Drive\DriveFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class GoogleDriveService
 {
     protected $client;
     protected $service;
+    protected $user;
 
-    public function __construct()
+    /**
+     * List folders from Google Drive
+     *
+     * @return array|null Array of folders with id and name, or null if error
+     */
+    public function listFolders(): ?array
     {
+        $this->authenticate();
+        if (!$this->user || !$this->user->hasGoogleDriveToken()) {
+            Log::info('Google Drive not configured for user', [
+                'user_id' => $this->user?->id,
+            ]);
+            return null;
+        }
+
+        // Refresh token if needed
+        if (!$this->setAccessToken($this->user)) {
+            return null;
+        }
+
+        try {
+            // Query for folders owned by the user
+            $results = $this->service->files->listFiles([
+                'q' => "mimeType='application/vnd.google-apps.folder' and trashed=false",
+                'fields' => 'files(id, name)',
+                'spaces' => 'drive'
+            ]);
+
+            $folders = [];
+            foreach ($results->getFiles() as $folder) {
+                $folders[] = [
+                    'id' => $folder->getId(),
+                    'name' => $folder->getName()
+                ];
+            }
+
+            return $folders;
+        } catch (\Exception $e) {
+            Log::error('Failed to list folders from Google Drive', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    private function authenticate()
+    {
+        if ($this->user)
+            return;
+        $this->user = Auth::user();
         $this->client = new Client();
         $this->client->setClientId(config('services.google.client_id'));
         $this->client->setClientSecret(config('services.google.client_secret'));
-        $this->client->setAccessToken(config('services.google.access_token'));
         $this->client->setScopes([Drive::DRIVE_FILE]);
+
+        if ($this->user && $this->user->hasGoogleDriveToken()) {
+            $this->setAccessToken($this->user);
+        }
 
         $this->service = new Drive($this->client);
     }
 
+    /**
+     * Set the access token for the Google API client.
+     * Refreshes the token if it's expired.
+     *
+     * @param User $user
+     * @return bool
+     */
+    protected function setAccessToken(User $user): bool
+    {
+        if (!$user->hasGoogleDriveToken()) {
+            return false;
+        }
+
+        $this->client->setAccessToken($user->google_access_token);
+
+        // If the token is expired, refresh it
+        if ($user->isGoogleDriveTokenExpired() && $user->google_refresh_token) {
+            try {
+                $this->client->fetchAccessTokenWithRefreshToken($user->google_refresh_token);
+                $token = $this->client->getAccessToken();
+
+                $user->update([
+                    'google_access_token' => $token['access_token'],
+                    'google_token_expires_at' => now()->addSeconds($token['expires_in']),
+                ]);
+
+                return true;
+            } catch (\Exception $e) {
+                Log::error('Failed to refresh Google Drive token', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public function saveArticleText(Article $article): ?string
     {
+        $this->authenticate();
+        if (!$this->user || !$this->user->hasGoogleDriveToken() || !$this->user->google_drive_folder_id) {
+            Log::info('Google Drive not configured for user', [
+                'article_id' => $article->id,
+                'user_id' => $this->user?->id,
+            ]);
+            return null;
+        }
+
+        // Refresh token if needed
+        if (!$this->setAccessToken($this->user)) {
+            return null;
+        }
+
         try {
             // Create a new file in Google Drive
             $fileMetadata = new DriveFile([
                 'name' => $article->title . '.txt',
                 'mimeType' => 'text/plain',
                 'description' => 'Article saved from NoteBrain: ' . $article->url,
-                'parents' => [config('services.google.folder_id')],
+                'parents' => [$this->user->google_drive_folder_id],
             ]);
 
             // Prepare the content

@@ -22,6 +22,10 @@
                                    class="block w-full text-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
                                     View All Articles
                                 </a>
+                                <a href="{{ route('profile.edit') }}"
+                                   class="block w-full text-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
+                                    Edit Profile
+                                </a>
                             </div>
                         </div>
 

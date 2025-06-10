@@ -15,6 +15,7 @@ integrations and automation.
     - Rich dashboard to manage all your articles
     - Keep articles unread, mark as read, or restore to inbox
     - Article summarization feature
+    - Google Drive integration to automatically save articles
 
 - **User Preferences**
     - Customize user-specific settings
@@ -75,7 +76,23 @@ cp .env.example .env
    php artisan key:generate
 ```
 
-Edit `.env` for your database and mail settings if needed.
+Edit `.env` for your database, mail, and Google Drive settings if needed.
+
+For Google Drive integration:
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Google Drive API
+4. Create OAuth 2.0 credentials (Web application type)
+5. Add your app's URL to the authorized JavaScript origins (e.g., http://localhost:8000)
+6. Add your callback URL to the authorized redirect URIs (e.g., http://localhost:8000/google/drive/callback)
+7. Copy the Client ID, Client Secret, and Redirect URI to your `.env` file:
+   ```
+   GOOGLE_DRIVE_CLIENT_ID=your-client-id
+   GOOGLE_DRIVE_CLIENT_SECRET=your-client-secret
+   GOOGLE_DRIVE_REDIRECT_URI=your-redirect-uri
+   ```
+
+   **Note**: The redirect URI in your `.env` file must exactly match the one configured in the Google Cloud Console. If you're getting a "redirect_uri_mismatch" error, make sure these values match.
 
 5. **Run Migrations**
 

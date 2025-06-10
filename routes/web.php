@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GoogleDriveController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserPreferenceController;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/articles/{article}/keep-unread', [ArticleController::class, 'keepUnread'])->name('articles.keep-unread');
     Route::post('/user/preferences', [UserPreferenceController::class, 'update'])->name('preferences.update');
     Route::get('/user/preferences', [UserPreferenceController::class, 'show'])->name('preferences.show');
+
+    // Google Drive OAuth routes
+    Route::get('/google/drive/connect', [GoogleDriveController::class, 'redirectToGoogle'])->name('google.drive.connect');
+    Route::get('/google/drive/callback', [GoogleDriveController::class, 'handleGoogleCallback'])->name('google.drive.callback');
+    Route::delete('/google/drive/disconnect', [GoogleDriveController::class, 'disconnect'])->name('google.drive.disconnect');
+    Route::get('/google/drive/folders', [GoogleDriveController::class, 'showFolders'])->name('google.drive.folders');
+    Route::post('/google/drive/folders', [GoogleDriveController::class, 'selectFolder'])->name('google.drive.select-folder');
 });
 
 require __DIR__ . '/auth.php';

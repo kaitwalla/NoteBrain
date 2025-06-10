@@ -22,6 +22,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'google_access_token',
+        'google_refresh_token',
+        'google_token_expires_at',
+        'google_drive_folder_id',
     ];
 
     /**
@@ -61,5 +65,29 @@ class User extends Authenticatable
             'font_family' => 'system',
             'line_height' => 1.5,
         ];
+    }
+
+    /**
+     * Check if the user has connected their Google Drive account.
+     *
+     * @return bool
+     */
+    public function hasGoogleDriveToken(): bool
+    {
+        return !is_null($this->google_access_token) && !is_null($this->google_refresh_token);
+    }
+
+    /**
+     * Check if the user's Google Drive token is expired.
+     *
+     * @return bool
+     */
+    public function isGoogleDriveTokenExpired(): bool
+    {
+        if (!$this->hasGoogleDriveToken()) {
+            return true;
+        }
+
+        return $this->google_token_expires_at && now()->isAfter($this->google_token_expires_at);
     }
 }
