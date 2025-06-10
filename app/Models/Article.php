@@ -30,6 +30,7 @@ class Article extends Model
         'site_name',
         'featured_image',
         'excerpt',
+        'google_drive_file_id',
         'summary',
         'summarized_at',
         'read_at',

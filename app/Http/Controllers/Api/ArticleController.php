@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Services\ArticleSummarizer;
+use App\Services\GoogleDriveService;
 use fivefilters\Readability\Configuration;
 use fivefilters\Readability\ParseException;
 use fivefilters\Readability\Readability;
@@ -14,10 +15,12 @@ use Illuminate\Validation\Rule;
 class ArticleController extends Controller
 {
     protected $summarizer;
+    protected $googleDriveService;
 
-    public function __construct(ArticleSummarizer $summarizer)
+    public function __construct(ArticleSummarizer $summarizer, GoogleDriveService $googleDriveService)
     {
         $this->summarizer = $summarizer;
+        $this->googleDriveService = $googleDriveService;
     }
 
     public function store(Request $request)
@@ -53,6 +56,12 @@ class ArticleController extends Controller
 
         try {
             $article->save();
+
+            // Save article text to Google Drive
+            $driveFileId = $this->googleDriveService->saveArticleText($article);
+            if ($driveFileId) {
+                $article->update(['google_drive_file_id' => $driveFileId]);
+            }
         } catch (\Exception $e) {
             \Log::error('Failed to save article: ' . $e->getMessage());
             \Log::error('User ID: ' . $userId);
