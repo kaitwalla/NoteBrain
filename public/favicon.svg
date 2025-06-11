@@ -1,0 +1,21 @@
+<svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Brain outline -->
+    <path d="M250 100C180 100 120 160 120 230C120 300 180 360 250 360C320 360 380 300 380 230C380 160 320 100 250 100Z" stroke="#F53003" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Brain connections -->
+    <path d="M200 150C180 170 170 200 170 230C170 260 180 290 200 310" stroke="#F53003" stroke-width="4" stroke-linecap="round"/>
+    <path d="M300 150C320 170 330 200 330 230C330 260 320 290 300 310" stroke="#F53003" stroke-width="4" stroke-linecap="round"/>
+    <path d="M250 100V360" stroke="#F53003" stroke-width="4" stroke-linecap="round"/>
+    <path d="M170 230H330" stroke="#F53003" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- Neural network nodes -->
+    <circle cx="200" cy="180" r="10" fill="#F53003"/>
+    <circle cx="250" cy="150" r="10" fill="#F53003"/>
+    <circle cx="300" cy="180" r="10" fill="#F53003"/>
+    <circle cx="180" cy="230" r="10" fill="#F53003"/>
+    <circle cx="250" cy="230" r="10" fill="#F53003"/>
+    <circle cx="320" cy="230" r="10" fill="#F53003"/>
+    <circle cx="200" cy="280" r="10" fill="#F53003"/>
+    <circle cx="250" cy="310" r="10" fill="#F53003"/>
+    <circle cx="300" cy="280" r="10" fill="#F53003"/>
+</svg>
