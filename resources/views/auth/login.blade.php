@@ -48,14 +48,6 @@
                     </div>
                 </form>
 
-                <div class="mt-6 text-center">
-                    <p class="text-sm text-gray-600">
-                        Don't have an account?
-                        <a href="{{ route('register') }}" class="font-medium text-primary-600 hover:text-primary-900">
-                            Sign up
-                        </a>
-                    </p>
-                </div>
             </div>
         </div>
     </div>
