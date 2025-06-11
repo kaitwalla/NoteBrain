@@ -9,6 +9,7 @@ use Google\Service\Drive;
 use Google\Service\Drive\DriveFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use League\HTMLToMarkdown\HtmlConverter;
 
 class GoogleDriveService
 {
@@ -136,13 +137,20 @@ class GoogleDriveService
         }
 
         try {
-            // Create a new file in Google Drive
+            // Create a new file in Google Drive as a Google Doc
             $fileMetadata = new DriveFile([
-                'name' => $article->title . '.txt',
-                'mimeType' => 'text/plain',
+                'name' => $article->title,
+                'mimeType' => 'application/vnd.google-apps.document',
                 'description' => 'Article saved from NoteBrain: ' . $article->url,
                 'parents' => [$this->user->google_drive_folder_id],
             ]);
+
+            // Convert HTML content to Markdown and strip any remaining HTML tags
+            $converter = app()->make(HtmlConverter::class);
+            if (method_exists($converter, 'setOptions')) {
+                $converter->setOptions(['strip_tags' => true]);
+            }
+            $markdownContent = $converter->convert($article->content);
 
             // Prepare the content
             $content = "Title: {$article->title}\n\n";
@@ -153,12 +161,12 @@ class GoogleDriveService
             if ($article->site_name) {
                 $content .= "Source: {$article->site_name}\n\n";
             }
-            $content .= "Content:\n\n{$article->content}";
+            $content .= "Content:\n\n{$markdownContent}";
 
-            // Upload the file
+            // Upload the file as a Google Doc
             $file = $this->service->files->create($fileMetadata, [
                 'data' => $content,
-                'mimeType' => 'text/plain',
+                'mimeType' => 'text/plain', // Source content is plain text
                 'uploadType' => 'multipart',
                 'fields' => 'id',
             ]);
