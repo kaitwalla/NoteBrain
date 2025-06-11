@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('user_preferences', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->json('article_preferences')->default();
+            $table->json('article_preferences');
             $table->timestamps();
         });
     }
