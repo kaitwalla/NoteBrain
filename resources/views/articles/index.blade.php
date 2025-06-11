@@ -100,9 +100,6 @@
                             <input type="checkbox" id="select-all"
                                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             <label for="select-all" class="ml-2 text-sm text-gray-700">Select All</label>
-                            <button id="exit-bulk-edit" class="ml-4 text-sm text-red-600 hover:text-red-800">Exit Bulk
-                                Edit
-                            </button>
                         </div>
                         <div class="space-y-6">
                             @foreach($articles as $article)

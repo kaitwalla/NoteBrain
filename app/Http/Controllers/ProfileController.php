@@ -25,8 +25,11 @@ class ProfileController extends Controller
         }
 
         // Create or retrieve a token for the bookmarklet
-        $user->tokens()->where('name', 'bookmarklet')->delete(); // Delete any existing bookmarklet tokens
-        $token = $user->createToken('bookmarklet')->plainTextToken;
+        $token = $user->tokens()->where('name', 'bookmarklet')->first()?->plainTextToken;
+        ds($token);
+        if (!$token) {
+            $token = $user->createToken('bookmarklet')->plainTextToken;
+        }
 
         // Debug the token
         \Log::info('Generated bookmarklet token: ' . $token);
