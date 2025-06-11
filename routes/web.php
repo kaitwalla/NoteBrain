@@ -35,6 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/articles/{article}/summarize', [ArticleController::class, 'summarize'])->name('articles.summarize');
     Route::post('/articles/{article}/keep-unread', [ArticleController::class, 'keepUnread'])->name('articles.keep-unread');
     Route::post('/articles/{article}/toggle-star', [ArticleController::class, 'toggleStar'])->name('articles.toggle-star');
+    Route::post('/articles/bulk-action', [ArticleController::class, 'bulkAction'])->name('articles.bulk-action');
     Route::post('/user/preferences', [UserPreferenceController::class, 'update'])->name('preferences.update');
     Route::get('/user/preferences', [UserPreferenceController::class, 'show'])->name('preferences.show');
 

@@ -224,6 +224,12 @@ class ArticleController extends Controller
     public function destroy(Article $article)
     {
         $this->authorize('delete', $article);
+
+        // Delete Google Drive document if it exists
+        if ($article->google_drive_file_id) {
+            $this->googleDriveService->deleteFile($article->google_drive_file_id);
+        }
+
         $article->delete();
         return redirect()->route('articles.index')->with('success', 'Article deleted successfully.');
     }
@@ -258,6 +264,96 @@ class ArticleController extends Controller
         } catch (\Exception $e) {
             \Log::error('Failed to toggle star status: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to toggle star status');
+        }
+    }
+
+    /**
+     * Handle bulk actions on multiple articles.
+     */
+    public function bulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'action' => 'required|string|in:archive,inbox,star,unstar,delete',
+            'article_ids' => 'required|array',
+            'article_ids.*' => 'exists:articles,id',
+        ]);
+
+        $action = $validated['action'];
+        $articleIds = $validated['article_ids'];
+        $count = count($articleIds);
+        $successMessage = '';
+
+        try {
+            // Get articles that belong to the current user
+            $articles = Article::whereIn('id', $articleIds)
+                ->where('user_id', auth()->id())
+                ->get();
+
+            if ($articles->isEmpty()) {
+                return redirect()->back()->with('error', 'No valid articles selected');
+            }
+
+            switch ($action) {
+                case 'archive':
+                    foreach ($articles as $article) {
+                        $article->archive();
+                    }
+                    $successMessage = $count . ' article(s) archived successfully';
+                    break;
+
+                case 'inbox':
+                    foreach ($articles as $article) {
+                        $article->moveToInbox();
+                    }
+                    $successMessage = $count . ' article(s) moved to inbox successfully';
+                    break;
+
+                case 'star':
+                    foreach ($articles as $article) {
+                        if (!$article->starred) {
+                            $article->star();
+                            // Save to Google Drive if not already saved
+                            if (!$article->google_drive_file_id) {
+                                $driveFileId = $this->googleDriveService->saveArticleText($article);
+                                if ($driveFileId) {
+                                    $article->update(['google_drive_file_id' => $driveFileId]);
+                                }
+                            }
+                        }
+                    }
+                    $successMessage = $count . ' article(s) starred successfully';
+                    break;
+
+                case 'unstar':
+                    foreach ($articles as $article) {
+                        if ($article->starred) {
+                            // Delete from Google Drive if saved
+                            if ($article->google_drive_file_id) {
+                                $this->googleDriveService->deleteFile($article->google_drive_file_id);
+                                $article->update(['google_drive_file_id' => null]);
+                            }
+                            $article->unstar();
+                        }
+                    }
+                    $successMessage = $count . ' article(s) unstarred successfully';
+                    break;
+
+                case 'delete':
+                    foreach ($articles as $article) {
+                        // Delete Google Drive document if it exists
+                        if ($article->google_drive_file_id) {
+                            $this->googleDriveService->deleteFile($article->google_drive_file_id);
+                        }
+                        $article->delete();
+                    }
+                    $successMessage = $count . ' article(s) deleted successfully';
+                    break;
+            }
+
+            return redirect()->back()->with('success', $successMessage);
+        } catch (\Exception $e) {
+            \Log::error('Failed to perform bulk action: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to perform bulk action');
         }
     }
 }
