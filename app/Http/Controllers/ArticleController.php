@@ -105,9 +105,12 @@ class ArticleController extends Controller
         }
 
         if ($request->boolean('summarize')) {
+            // Dispatch the job to summarize the article asynchronously
+            \App\Jobs\SummarizeArticle::dispatch($article);
+
+            // Update the summarized_at timestamp immediately
             $article->update([
                 'summarized_at' => now(),
-                'summary' => $this->summarizer->summarize($article),
             ]);
         }
 
@@ -157,9 +160,12 @@ class ArticleController extends Controller
     public function summarize(Article $article)
     {
         if (!$article->summary) {
+            // Dispatch the job to summarize the article asynchronously
+            \App\Jobs\SummarizeArticle::dispatch($article);
+
+            // Update the summarized_at timestamp immediately
             $article->update([
                 'summarized_at' => now(),
-                'summary' => $this->summarizer->summarize($article),
             ]);
         } else {
             $article->update([
@@ -167,7 +173,7 @@ class ArticleController extends Controller
             ]);
         }
 
-        return redirect()->route('articles.index')->with('success', 'Article summarized successfully.');
+        return redirect()->route('articles.index')->with('success', 'Article summarization started.');
     }
 
     /**

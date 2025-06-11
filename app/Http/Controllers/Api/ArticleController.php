@@ -143,9 +143,12 @@ class ArticleController extends Controller
         }
 
         if ($request->boolean('summarize')) {
+            // Dispatch the job to summarize the article asynchronously
+            \App\Jobs\SummarizeArticle::dispatch($article);
+
+            // Update the summarized_at timestamp immediately
             $article->update([
                 'summarized_at' => now(),
-                'summary' => $this->summarizer->summarize($article),
             ]);
         }
 
@@ -183,12 +186,89 @@ class ArticleController extends Controller
         }
     }
 
+    /**
+     * Summarize an article via JSONP for the bookmarklet.
+     */
+    public function summarizeJsonp(Request $request, Article $article)
+    {
+        \Log::info('API ArticleController summarizeJsonp method called');
+        \Log::info('Request data: ' . json_encode($request->all()));
+
+        // Get the callback function name from the request
+        $callback = $request->input('callback', 'callback');
+
+        // Validate the request
+        if (!$request->has('token')) {
+            return response()->json([
+                'error' => 'Missing required token parameter',
+            ])->setCallback($callback);
+        }
+
+        $token = $request->input('token');
+
+        // Authenticate the user using the token
+        $tokenModel = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+        if (!$tokenModel) {
+            return response()->json([
+                'error' => 'Invalid token',
+            ])->setCallback($callback);
+        }
+
+        // Get the user from the token
+        $user = $tokenModel->tokenable;
+        if (!$user) {
+            return response()->json([
+                'error' => 'User not found',
+            ])->setCallback($callback);
+        }
+
+        // Set the authenticated user
+        auth()->login($user);
+
+        // Check if the article belongs to the user
+        if ($article->user_id !== $user->id) {
+            return response()->json([
+                'error' => 'Unauthorized access to article',
+            ])->setCallback($callback);
+        }
+
+        try {
+            if (!$article->summary) {
+                // Dispatch the job to summarize the article asynchronously
+                \App\Jobs\SummarizeArticle::dispatch($article);
+
+                // Update the summarized_at timestamp immediately
+                $article->update([
+                    'summarized_at' => now(),
+                ]);
+            } else {
+                $article->update([
+                    'summarized_at' => now(),
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Article summarization started',
+                'article' => $article
+            ])->setCallback($callback);
+        } catch (\Exception $e) {
+            \Log::error('Failed to start article summarization: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to start article summarization',
+                'error' => $e->getMessage(),
+            ])->setCallback($callback);
+        }
+    }
+
     public function summarize(Article $article)
     {
         if (!$article->summary) {
+            // Dispatch the job to summarize the article asynchronously
+            \App\Jobs\SummarizeArticle::dispatch($article);
+
+            // Update the summarized_at timestamp immediately
             $article->update([
                 'summarized_at' => now(),
-                'summary' => $this->summarizer->summarize($article),
             ]);
         } else {
             $article->update([
@@ -197,7 +277,7 @@ class ArticleController extends Controller
         }
 
         return response()->json([
-            'message' => 'Article summarized successfully',
+            'message' => 'Article summarization started',
             'article' => $article
         ]);
     }
@@ -301,8 +381,84 @@ class ArticleController extends Controller
     }
 
     /**
-     * Star an article and save it to Google Drive.
+     * Star an article via JSONP for the bookmarklet.
      */
+    public function starJsonp(Request $request, Article $article)
+    {
+        \Log::info('API ArticleController starJsonp method called');
+        \Log::info('Request data: ' . json_encode($request->all()));
+
+        // Get the callback function name from the request
+        $callback = $request->input('callback', 'callback');
+
+        // Validate the request
+        if (!$request->has('token')) {
+            return response()->json([
+                'error' => 'Missing required token parameter',
+            ])->setCallback($callback);
+        }
+
+        $token = $request->input('token');
+
+        // Authenticate the user using the token
+        $tokenModel = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+        if (!$tokenModel) {
+            return response()->json([
+                'error' => 'Invalid token',
+            ])->setCallback($callback);
+        }
+
+        // Get the user from the token
+        $user = $tokenModel->tokenable;
+        if (!$user) {
+            return response()->json([
+                'error' => 'User not found',
+            ])->setCallback($callback);
+        }
+
+        // Set the authenticated user
+        auth()->login($user);
+
+        // Check if the article belongs to the user
+        if ($article->user_id !== $user->id) {
+            return response()->json([
+                'error' => 'Unauthorized access to article',
+            ])->setCallback($callback);
+        }
+
+        try {
+            // Check if article is already starred
+            if ($article->starred) {
+                return response()->json([
+                    'message' => 'Article already starred',
+                    'article' => $article
+                ])->setCallback($callback);
+            }
+
+            // Star the article
+            $article->star();
+
+            // If article doesn't have a Google Drive file ID, save it to Google Drive
+            if (!$article->google_drive_file_id) {
+                $driveFileId = $this->googleDriveService->saveArticleText($article);
+                if ($driveFileId) {
+                    $article->update(['google_drive_file_id' => $driveFileId]);
+                }
+            }
+
+            return response()->json([
+                'message' => 'Article starred successfully',
+                'article' => $article
+            ])->setCallback($callback);
+        } catch (\Exception $e) {
+            \Log::error('Failed to star article: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to star article',
+                'error' => $e->getMessage(),
+            ])->setCallback($callback);
+        }
+    }
+
     public function star(Article $article)
     {
         try {

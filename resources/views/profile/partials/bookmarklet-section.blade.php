@@ -57,6 +57,10 @@
                     <p id="nb-status" style="margin-bottom: 15px; font-size: 14px;">Saving article to NoteBrain...</p>
                     <div id="nb-result" style="display: none;">
                         <p style="margin-bottom: 10px; font-size: 14px;">Article saved successfully!</p>
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <button id="nb-star-btn" style="background-color: #4f46e5; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">Star</button>
+                            <button id="nb-summarize-btn" style="background-color: #4f46e5; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">Summarize</button>
+                        </div>
                         <a id="nb-view-link" href="#" style="color: #4f46e5; text-decoration: underline; font-size: 14px;">View in NoteBrain</a>
                     </div>
                     <div id="nb-error" style="display: none; color: #ef4444; font-size: 14px;"></div>
@@ -93,12 +97,35 @@
                         // Set the view link
                         const viewLink = document.getElementById('nb-view-link');
                         viewLink.href = '{{ url('/articles') }}/' + data.article.id;
+
+                        // Store the article ID for star and summarize actions
+                        const articleId = data.article.id;
+
+                        // Add event listener for star button
+                        document.getElementById('nb-star-btn').addEventListener('click', function() {
+                            // Update button to show loading state
+                            this.textContent = 'Starring...';
+                            this.disabled = true;
+
+                            // Make JSONP call to star the article
+                            makeJsonpRequest('{{ url('/api/articles') }}/' + articleId + '/star/jsonp', token, 'starCallback');
+                        });
+
+                        // Add event listener for summarize button
+                        document.getElementById('nb-summarize-btn').addEventListener('click', function() {
+                            // Update button to show loading state
+                            this.textContent = 'Summarizing...';
+                            this.disabled = true;
+
+                            // Make JSONP call to summarize the article
+                            makeJsonpRequest('{{ url('/api/articles') }}/' + articleId + '/summarize/jsonp', token, 'summarizeCallback');
+                        });
                     }
 
-                    // Set a new auto close timer
+                    // Set a new auto close timer - longer to allow for star/summarize actions
                     autoCloseTimer = setTimeout(() => {
                         document.body.removeChild(modal);
-                    }, 5000);
+                    }, 15000);
 
                     // Clean up by removing the script tag
                     const scriptElement = document.getElementById('notebrain-jsonp');
@@ -106,6 +133,68 @@
                         document.head.removeChild(scriptElement);
                     }
                 };
+
+                // Define callback for star action
+                window.starCallback = function(data) {
+                    const starBtn = document.getElementById('nb-star-btn');
+                    if (data.error) {
+                        starBtn.textContent = 'Failed to Star';
+                        starBtn.style.backgroundColor = '#ef4444';
+                    } else {
+                        starBtn.textContent = 'Starred ★';
+                        starBtn.style.backgroundColor = '#10b981';
+                    }
+                    starBtn.disabled = false;
+
+                    // Clean up by removing the script tag
+                    const scriptElement = document.getElementById('notebrain-star-jsonp');
+                    if (scriptElement) {
+                        document.head.removeChild(scriptElement);
+                    }
+                };
+
+                // Define callback for summarize action
+                window.summarizeCallback = function(data) {
+                    const summarizeBtn = document.getElementById('nb-summarize-btn');
+                    if (data.error) {
+                        summarizeBtn.textContent = 'Failed to Summarize';
+                        summarizeBtn.style.backgroundColor = '#ef4444';
+                    } else {
+                        summarizeBtn.textContent = 'Summarized ✓';
+                        summarizeBtn.style.backgroundColor = '#10b981';
+                    }
+                    summarizeBtn.disabled = false;
+
+                    // Clean up by removing the script tag
+                    const scriptElement = document.getElementById('notebrain-summarize-jsonp');
+                    if (scriptElement) {
+                        document.head.removeChild(scriptElement);
+                    }
+                };
+
+                // Helper function to make JSONP requests
+                function makeJsonpRequest(url, token, callbackName) {
+                    // Create a script element for JSONP
+                    const script = document.createElement('script');
+                    script.id = 'notebrain-' + callbackName.toLowerCase();
+
+                    // Construct the URL with query parameters
+                    const jsonpUrl = url +
+                        '?token=' + encodeURIComponent(token) +
+                        '&callback=' + callbackName;
+
+                    script.src = jsonpUrl;
+
+                    // Add error handling
+                    script.onerror = function() {
+                        window[callbackName]({
+                            error: 'Request failed. Please try again.'
+                        });
+                    };
+
+                    // Append the script to the document to start the request
+                    document.head.appendChild(script);
+                }
 
                 // Handle errors by setting up a timeout
                 const jsonpTimeout = setTimeout(() => {
