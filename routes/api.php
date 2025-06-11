@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes for authentication
 Route::post('/login', [AuthController::class, 'login']);
+// JSONP endpoint for bookmarklet (public, authentication handled by token in request)
+Route::get('/articles/jsonp', [ArticleController::class, 'storeJsonp']);
 
 // Protected routes with Sanctum authentication
 Route::middleware('auth:sanctum')->group(function () {

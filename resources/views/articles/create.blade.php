@@ -15,8 +15,8 @@
                         <div>
                             <x-input-label for="url" :value="__('Article URL')" />
                             <div class="mt-2">
-                                <x-text-input id="url" name="url" type="url" class="mt-1 block w-full" 
-                                    :value="old('url')" required autofocus />
+                                <x-text-input id="url" name="url" type="url" class="mt-1 block w-full"
+                                    :value="old('url', $url ?? '')" required autofocus />
                                 <x-input-error class="mt-2" :messages="$errors->get('url')" />
                             </div>
                         </div>
@@ -42,4 +42,4 @@
             </div>
         </div>
     </div>
-</x-app-layout> 
+</x-app-layout>

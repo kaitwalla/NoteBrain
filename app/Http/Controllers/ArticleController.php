@@ -53,9 +53,11 @@ class ArticleController extends Controller
     /**
      * Show the form for saving a new article.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('articles.create');
+        return view('articles.create', [
+            'url' => $request->query('url')
+        ]);
     }
 
     /**

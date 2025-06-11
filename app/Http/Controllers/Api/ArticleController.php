@@ -22,14 +22,92 @@ class ArticleController extends Controller
         $this->googleDriveService = $googleDriveService;
     }
 
+    /**
+     * Store a new article using JSONP to avoid CORS issues.
+     * This endpoint is specifically for the bookmarklet.
+     */
+    public function storeJsonp(Request $request)
+    {
+        \Log::info('API ArticleController storeJsonp method called');
+        \Log::info('Request data: ' . json_encode($request->all()));
+
+        // Get the callback function name from the request
+        $callback = $request->input('callback', 'callback');
+
+        // Validate the request
+        if (!$request->has('url') || !$request->has('token')) {
+            return response()->json([
+                'error' => 'Missing required parameters',
+            ])->setCallback($callback);
+        }
+
+        $url = $request->input('url');
+        $token = $request->input('token');
+
+        // Authenticate the user using the token
+        $tokenModel = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+        if (!$tokenModel) {
+            return response()->json([
+                'error' => 'Invalid token',
+            ])->setCallback($callback);
+        }
+
+        // Get the user from the token
+        $user = $tokenModel->tokenable;
+        if (!$user) {
+            return response()->json([
+                'error' => 'User not found',
+            ])->setCallback($callback);
+        }
+
+        // Set the authenticated user
+        auth()->login($user);
+
+        // Fetch article metadata
+        $metadata = $this->fetchArticleMetadata($url);
+
+        // Create the article
+        $article = new Article([
+            'url' => $url,
+            'status' => Article::STATUS_INBOX,
+            'user_id' => $user->id,
+            'title' => $metadata['title'] ?? 'Untitled Article',
+            'content' => $metadata['content'] ?? '',
+            'author' => $metadata['author'] ?? null,
+            'site_name' => $metadata['site_name'] ?? null,
+            'featured_image' => $metadata['featured_image'] ?? null,
+            'excerpt' => $metadata['excerpt'] ?? null,
+        ]);
+
+        try {
+            $article->save();
+        } catch (\Exception $e) {
+            \Log::error('Failed to save article: ' . $e->getMessage());
+            \Log::error('User ID: ' . $user->id);
+            return response()->json([
+                'error' => 'Failed to save article: ' . $e->getMessage(),
+            ])->setCallback($callback);
+        }
+
+        return response()->json([
+            'message' => 'Article created successfully',
+            'article' => $article,
+        ])->setCallback($callback);
+    }
+
     public function store(Request $request)
     {
+        \Log::info('API ArticleController store method called');
+        \Log::info('Request data: ' . json_encode($request->all()));
+        \Log::info('Auth user: ' . (auth()->check() ? auth()->id() : 'Not authenticated'));
+
         $validated = $request->validate([
             'url' => 'required|url',
             'summarize' => 'boolean',
         ]);
 
         if (!auth()->check()) {
+            \Log::error('API ArticleController: User not authenticated');
             return response()->json([
                 'message' => 'Unauthenticated',
             ], 401);
