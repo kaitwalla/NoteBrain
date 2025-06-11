@@ -186,4 +186,44 @@ class GoogleDriveService
             return null;
         }
     }
+
+    /**
+     * Delete an article from Google Drive.
+     *
+     * @param string $fileId The Google Drive file ID to delete
+     * @return bool Whether the deletion was successful
+     */
+    public function deleteFile(string $fileId): bool
+    {
+        $this->authenticate();
+        if (!$this->user || !$this->user->hasGoogleDriveToken()) {
+            Log::info('Google Drive not configured for user', [
+                'user_id' => $this->user?->id,
+            ]);
+            return false;
+        }
+
+        // Refresh token if needed
+        if (!$this->setAccessToken($this->user)) {
+            return false;
+        }
+
+        try {
+            // Delete the file from Google Drive
+            $this->service->files->delete($fileId);
+
+            Log::info('Article deleted from Google Drive', [
+                'drive_file_id' => $fileId,
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to delete article from Google Drive', [
+                'drive_file_id' => $fileId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
 }

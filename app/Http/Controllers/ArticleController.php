@@ -93,11 +93,9 @@ class ArticleController extends Controller
         try {
             $article->save();
 
-            // Save article text to Google Drive
-            $driveFileId = $this->googleDriveService->saveArticleText($article);
-            if ($driveFileId) {
-                $article->update(['google_drive_file_id' => $driveFileId]);
-            }
+            // Google Drive integration has been disabled for article save
+            // Articles are only saved to Google Drive when starred
+
         } catch (\Exception $e) {
             \Log::error('Failed to save article: ' . $e->getMessage());
             \Log::error('User ID: ' . $userId);
@@ -228,5 +226,38 @@ class ArticleController extends Controller
         $this->authorize('delete', $article);
         $article->delete();
         return redirect()->route('articles.index')->with('success', 'Article deleted successfully.');
+    }
+
+    /**
+     * Toggle the star status of an article.
+     */
+    public function toggleStar(Article $article)
+    {
+        try {
+            if ($article->starred) {
+                // If article is starred, unstar it
+                if ($article->google_drive_file_id) {
+                    $this->googleDriveService->deleteFile($article->google_drive_file_id);
+                    $article->update(['google_drive_file_id' => null]);
+                }
+                $article->unstar();
+                $message = 'Article unstarred successfully';
+            } else {
+                // If article is not starred, star it
+                $article->star();
+                if (!$article->google_drive_file_id) {
+                    $driveFileId = $this->googleDriveService->saveArticleText($article);
+                    if ($driveFileId) {
+                        $article->update(['google_drive_file_id' => $driveFileId]);
+                    }
+                }
+                $message = 'Article starred successfully';
+            }
+
+            return redirect()->back()->with('success', $message);
+        } catch (\Exception $e) {
+            \Log::error('Failed to toggle star status: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to toggle star status');
+        }
     }
 }

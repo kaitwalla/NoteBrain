@@ -26,6 +26,7 @@ class Article extends Model
         'content',
         'url',
         'status',
+        'starred',
         'author',
         'site_name',
         'featured_image',
@@ -46,6 +47,7 @@ class Article extends Model
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'starred' => 'boolean',
     ];
 
     /**
@@ -110,6 +112,34 @@ class Article extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ArticleImage::class);
+    }
+
+    /**
+     * Star the article.
+     */
+    public function star(): void
+    {
+        $this->update([
+            'starred' => true,
+        ]);
+    }
+
+    /**
+     * Unstar the article.
+     */
+    public function unstar(): void
+    {
+        $this->update([
+            'starred' => false,
+        ]);
+    }
+
+    /**
+     * Scope a query to only include starred articles.
+     */
+    public function scopeStarred($query)
+    {
+        return $query->where('starred', true);
     }
 
     public static function getStatuses()

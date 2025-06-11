@@ -69,6 +69,23 @@
 
         <!-- Vertical Action Button Row -->
         <div class="fixed top-[15px] right-[10px] left-auto flex flex-col space-y-2 z-50">
+            <!-- Star Toggle Button -->
+            <form method="POST" action="{{ route('articles.toggle-star', $article) }}" class="star-form">
+                @csrf
+                <button type="submit"
+                        class="p-2 rounded-full border border-gray-200 shadow-sm bg-white {{ $article->starred ? 'text-yellow-400' : 'text-gray-400' }} hover:text-yellow-500 transition"
+                        title="{{ $article->starred ? 'Unstar' : 'Star' }} article">
+                    <svg class="w-6 h-6" fill="{{ $article->starred ? 'currentColor' : 'none' }}" stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path
+                            stroke-linejoin="miter"
+                            stroke-width="2"
+                            d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z"/>
+                    </svg>
+                </button>
+
+
+            </form>
             <button type="button"
                     class="p-2 text-gray-500 hover:text-gray-700 bg-white rounded-full shadow-sm border border-gray-200"
                     title="Display Settings">
@@ -442,7 +459,7 @@
             // Add event listener for summarize form
             const summarizeForm = document.getElementById('summarize-form');
             if (summarizeForm) {
-                summarizeForm.addEventListener('submit', function(e) {
+                summarizeForm.addEventListener('submit', function (e) {
                     const button = document.getElementById('summarize-button');
                     if (button) {
                         // Disable the button and show loading state

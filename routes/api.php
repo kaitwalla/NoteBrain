@@ -31,6 +31,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/articles/{article}/keep-unread', [ArticleController::class, 'keepUnread']);
     Route::post('/articles/{article}/read', [ArticleController::class, 'read']);
     Route::post('/articles/{article}/summarize', [ArticleController::class, 'summarize']);
+    Route::post('/articles/{article}/star', [ArticleController::class, 'star']);
+    Route::post('/articles/{article}/unstar', [ArticleController::class, 'unstar']);
+    Route::post('/articles/{article}/toggle-star', [ArticleController::class, 'toggleStar']);
 });
 
 // API routes don't need web authentication routes

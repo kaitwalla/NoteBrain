@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/articles/{article}/restore', [ArticleController::class, 'restore'])->name('articles.restore');
     Route::post('/articles/{article}/summarize', [ArticleController::class, 'summarize'])->name('articles.summarize');
     Route::post('/articles/{article}/keep-unread', [ArticleController::class, 'keepUnread'])->name('articles.keep-unread');
+    Route::post('/articles/{article}/toggle-star', [ArticleController::class, 'toggleStar'])->name('articles.toggle-star');
     Route::post('/user/preferences', [UserPreferenceController::class, 'update'])->name('preferences.update');
     Route::get('/user/preferences', [UserPreferenceController::class, 'show'])->name('preferences.show');
 
