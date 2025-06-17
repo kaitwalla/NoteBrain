@@ -18,9 +18,17 @@
                                    class="block w-full text-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
                                     Save New Article
                                 </a>
+                                <a href="{{ route('notes.create') }}"
+                                   class="block w-full text-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                                    Create New Note
+                                </a>
                                 <a href="{{ route('articles.index') }}"
                                    class="block w-full text-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
                                     View All Articles
+                                </a>
+                                <a href="{{ route('notes.index') }}"
+                                   class="block w-full text-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
+                                    View All Notes
                                 </a>
                                 <a href="{{ route('profile.edit') }}"
                                    class="block w-full text-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
@@ -39,6 +47,21 @@
                                 </div>
                                 <div class="text-center">
                                     <div class="text-2xl font-bold text-gray-900">{{ $archivedCount }}</div>
+                                    <div class="text-sm text-gray-500">Archived</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Note Stats -->
+                        <div class="bg-white p-6 rounded-lg border">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Note Stats</h3>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-900">{{ $noteInboxCount }}</div>
+                                    <div class="text-sm text-gray-500">Inbox</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-900">{{ $noteArchivedCount }}</div>
                                     <div class="text-sm text-gray-500">Archived</div>
                                 </div>
                             </div>

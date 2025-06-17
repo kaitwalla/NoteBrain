@@ -25,39 +25,50 @@
 <body class="font-sans antialiased">
 <div class="min-h-screen bg-gray-100">
     @auth
-        @unless(request()->routeIs('dashboard') || request()->routeIs('articles.show'))
-            <div class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex justify-between items-center h-16">
-                        <div class="flex items-center flex-1 min-w-0">
-                            @unless(request()->routeIs('dashboard'))
-                                <a href="{{ route('dashboard') }}"
-                                   class="text-gray-500 hover:text-gray-700 flex-shrink-0">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                                    </svg>
-                                </a>
-                            @endunless
-                            <h1 class="@unless(request()->routeIs('dashboard')) ml-4 @endunless text-lg font-medium text-gray-900 truncate">
-                                @if(request()->routeIs('articles.create'))
-                                    Save New Article
-                                @elseif(request()->routeIs('articles.index'))
-                                    All Articles
-                                @elseif(request()->routeIs('dashboard'))
-                                    {{ config('app.name', 'Laravel') }}
-                                @else
-                                    {{ ucfirst(request()->route()->getName()) }}
-                                @endif
-                            </h1>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <!-- Empty div to maintain layout -->
+        @include('layouts.navigation')
+
+        <!-- Page Heading -->
+        @if (isset($header))
+            <header class="bg-white shadow">
+                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    {{ $header }}
+                </div>
+            </header>
+        @else
+            @unless(request()->routeIs('dashboard') || request()->routeIs('articles.show'))
+                <div class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="flex justify-between items-center h-16">
+                            <div class="flex items-center flex-1 min-w-0">
+                                @unless(request()->routeIs('dashboard'))
+                                    <a href="{{ route('dashboard') }}"
+                                       class="text-gray-500 hover:text-gray-700 flex-shrink-0">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                                        </svg>
+                                    </a>
+                                @endunless
+                                <h1 class="@unless(request()->routeIs('dashboard')) ml-4 @endunless text-lg font-medium text-gray-900 truncate">
+                                    @if(request()->routeIs('articles.create'))
+                                        Save New Article
+                                    @elseif(request()->routeIs('articles.index'))
+                                        All Articles
+                                    @elseif(request()->routeIs('dashboard'))
+                                        {{ config('app.name', 'Laravel') }}
+                                    @else
+                                        {{ ucfirst(request()->route()->getName()) }}
+                                    @endif
+                                </h1>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <!-- Empty div to maintain layout -->
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        @endunless
+            @endunless
+        @endif
     @endauth
 
     {{ $slot }}
@@ -72,7 +83,7 @@
         </a>
 
         <!-- Vertical Action Button Row -->
-        <div class="fixed top-[15px] right-[10px] left-auto flex flex-col space-y-2 z-50">
+        <div id="vertical-action-buttons" class="fixed top-[15px] right-[10px] left-auto flex flex-col space-y-2 z-50 opacity-0 invisible transition-opacity duration-200">
             <!-- Star Toggle Button -->
             <form method="POST" action="{{ route('articles.toggle-star', $article) }}" class="star-form">
                 @csrf
@@ -445,11 +456,41 @@
             });
     }
 
+    function handleScroll() {
+        const nav = document.querySelector('nav');
+        const actionButtons = document.getElementById('vertical-action-buttons');
+
+        if (nav && actionButtons) {
+            const navBottom = nav.getBoundingClientRect().bottom;
+
+            if (navBottom <= 0) {
+                // Navigation is out of view, show the buttons
+                actionButtons.classList.remove('invisible');
+                actionButtons.classList.add('visible');
+                actionButtons.style.opacity = '1';
+            } else {
+                // Navigation is in view, hide the buttons
+                actionButtons.style.opacity = '0';
+                setTimeout(() => {
+                    if (nav.getBoundingClientRect().bottom > 0) {
+                        actionButtons.classList.add('invisible');
+                        actionButtons.classList.remove('visible');
+                    }
+                }, 200); // Match the transition duration
+            }
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const isArticlePage = window.location.pathname.includes('/articles/') && !window.location.pathname.endsWith('/create');
         if (isArticlePage) {
             MenuManager.register('settings-popover', 'Display Settings');
             MenuManager.register('status-menu', {selector: '[title="Change Status"]'});
+
+            // Set up scroll event listener to show/hide action buttons
+            window.addEventListener('scroll', handleScroll);
+            // Initial check in case page is loaded scrolled down
+            handleScroll();
 
             // Add event listener for keep-unread button
             const keepUnreadButton = document.querySelector('[data-action="keep-unread"]');

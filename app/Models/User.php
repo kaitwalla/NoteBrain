@@ -56,6 +56,11 @@ class User extends Authenticatable
         return $this->hasOne(UserPreference::class);
     }
 
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
+    }
+
     public function getArticlePreferences()
     {
         return $this->preferences?->article_preferences ?? [

@@ -62,8 +62,6 @@
                             </div>
                         @endif
 
-                        <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ $article->title }}</h1>
-
                         <div class="flex items-center text-sm text-gray-500 mb-8">
                             @if($article->author)
                                 <span class="font-medium">{{ $article->author }}</span>

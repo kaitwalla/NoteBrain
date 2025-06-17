@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\Note;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,11 +30,21 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Get note counts
+        $noteInboxCount = Note::where('user_id', $user->id)
+            ->where('status', Note::STATUS_INBOX)
+            ->count();
+        $noteArchivedCount = Note::where('user_id', $user->id)
+            ->where('status', Note::STATUS_ARCHIVED)
+            ->count();
+
         return view('dashboard', compact(
             'inboxCount',
             'archivedCount',
             'summarizeCount',
-            'recentArticles'
+            'recentArticles',
+            'noteInboxCount',
+            'noteArchivedCount'
         ));
     }
-} 
+}

@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoogleDriveController;
+use App\Http\Controllers\NotesController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserPreferenceController;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/articles/bulk-action', [ArticleController::class, 'bulkAction'])->name('articles.bulk-action');
     Route::post('/user/preferences', [UserPreferenceController::class, 'update'])->name('preferences.update');
     Route::get('/user/preferences', [UserPreferenceController::class, 'show'])->name('preferences.show');
+
+    // Notes routes
+    Route::get('/notes', [NotesController::class, 'index'])->name('notes.index');
+    Route::get('/notes/create', [NotesController::class, 'create'])->name('notes.create');
+    Route::post('/notes', [NotesController::class, 'store'])->name('notes.store');
+    Route::get('/notes/{note}', [NotesController::class, 'show'])->name('notes.show');
+    Route::get('/notes/{note}/edit', [NotesController::class, 'edit'])->name('notes.edit');
+    Route::put('/notes/{note}', [NotesController::class, 'update'])->name('notes.update');
+    Route::delete('/notes/{note}', [NotesController::class, 'destroy'])->name('notes.destroy');
+    Route::post('/notes/{note}/archive', [NotesController::class, 'archive'])->name('notes.archive');
+    Route::post('/notes/{note}/inbox', [NotesController::class, 'inbox'])->name('notes.inbox');
+    Route::post('/notes/{note}/toggle-star', [NotesController::class, 'toggleStar'])->name('notes.toggle-star');
+    Route::post('/notes/bulk-action', [NotesController::class, 'bulkAction'])->name('notes.bulk-action');
 
     // Google Drive OAuth routes
     Route::get('/google/drive/connect', [GoogleDriveController::class, 'redirectToGoogle'])->name('google.drive.connect');

@@ -21,9 +21,11 @@ return new class extends Migration
             $table->string('featured_image')->nullable();
             $table->string('author')->nullable();
             $table->string('site_name')->nullable();
-            $table->enum('status', ['inbox', 'unread', 'read', 'archived'])->default('inbox');
+            $table->string('status')->default('inbox'); // Use string instead of enum
             $table->timestamp('read_at')->nullable();
             $table->timestamp('archived_at')->nullable();
+            $table->timestamp('summarized_at')->nullable();
+            $table->text('summary')->nullable();
             $table->timestamps();
 
             // Add index for faster queries
