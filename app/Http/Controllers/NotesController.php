@@ -3,11 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Note;
+use App\Services\GoogleDriveService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class NotesController extends Controller
 {
+    protected $googleDriveService;
+
+    public function __construct(GoogleDriveService $googleDriveService)
+    {
+        $this->googleDriveService = $googleDriveService;
+    }
     /**
      * Display a listing of the notes.
      */
@@ -148,10 +155,22 @@ class NotesController extends Controller
 
         try {
             if ($note->starred) {
+                // If note is starred, unstar it
+                if ($note->google_drive_file_id) {
+                    $this->googleDriveService->deleteFile($note->google_drive_file_id);
+                    $note->update(['google_drive_file_id' => null]);
+                }
                 $note->unstar();
                 $message = 'Note unstarred successfully';
             } else {
+                // If note is not starred, star it
                 $note->star();
+                if (!$note->google_drive_file_id) {
+                    $driveFileId = $this->googleDriveService->saveNoteText($note);
+                    if ($driveFileId) {
+                        $note->update(['google_drive_file_id' => $driveFileId]);
+                    }
+                }
                 $message = 'Note starred successfully';
             }
 
@@ -218,6 +237,12 @@ class NotesController extends Controller
                     foreach ($notes as $note) {
                         if (!$note->starred) {
                             $note->star();
+                            if (!$note->google_drive_file_id) {
+                                $driveFileId = $this->googleDriveService->saveNoteText($note);
+                                if ($driveFileId) {
+                                    $note->update(['google_drive_file_id' => $driveFileId]);
+                                }
+                            }
                         }
                     }
                     $successMessage = $count . ' note(s) starred successfully';
@@ -226,6 +251,10 @@ class NotesController extends Controller
                 case 'unstar':
                     foreach ($notes as $note) {
                         if ($note->starred) {
+                            if ($note->google_drive_file_id) {
+                                $this->googleDriveService->deleteFile($note->google_drive_file_id);
+                                $note->update(['google_drive_file_id' => null]);
+                            }
                             $note->unstar();
                         }
                     }

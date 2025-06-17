@@ -27,6 +27,7 @@ class Note extends Model
         'starred',
         'archived_at',
         'user_id',
+        'google_drive_file_id',
     ];
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Article;
+use App\Models\Note;
 use App\Models\User;
 use Google\Client;
 use Google\Service\Drive;
@@ -188,7 +189,66 @@ class GoogleDriveService
     }
 
     /**
-     * Delete an article from Google Drive.
+     * Save a note to Google Drive.
+     *
+     * @param Note $note The note to save
+     * @return string|null The Google Drive file ID if successful, null otherwise
+     */
+    public function saveNoteText(Note $note): ?string
+    {
+        $this->authenticate();
+        if (!$this->user || !$this->user->hasGoogleDriveToken() || !$this->user->google_drive_folder_id) {
+            Log::info('Google Drive not configured for user', [
+                'note_id' => $note->id,
+                'user_id' => $this->user?->id,
+            ]);
+            return null;
+        }
+
+        // Refresh token if needed
+        if (!$this->setAccessToken($this->user)) {
+            return null;
+        }
+
+        try {
+            // Create a new file in Google Drive as a Google Doc
+            $fileMetadata = new DriveFile([
+                'name' => 'Note | ' . $note->title,
+                'mimeType' => 'application/vnd.google-apps.document',
+                'description' => 'Note saved from NoteBrain',
+                'parents' => [$this->user->google_drive_folder_id],
+            ]);
+
+            // Prepare the content
+            $content = "Title: {$note->title}\n\n";
+            $content .= "Content:\n\n{$note->content}";
+
+            // Upload the file as a Google Doc
+            $file = $this->service->files->create($fileMetadata, [
+                'data' => $content,
+                'mimeType' => 'text/plain', // Source content is plain text
+                'uploadType' => 'multipart',
+                'fields' => 'id',
+            ]);
+
+            Log::info('Note saved to Google Drive', [
+                'note_id' => $note->id,
+                'drive_file_id' => $file->id,
+            ]);
+
+            return $file->id;
+        } catch (\Exception $e) {
+            Log::error('Failed to save note to Google Drive', [
+                'note_id' => $note->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
+     * Delete a file from Google Drive.
      *
      * @param string $fileId The Google Drive file ID to delete
      * @return bool Whether the deletion was successful
