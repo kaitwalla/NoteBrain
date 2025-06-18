@@ -22,6 +22,12 @@ class ArticleController extends Controller
         $this->googleDriveService = $googleDriveService;
     }
 
+    public function listAll()
+    {
+        $articles = Article::where('user_id', auth()->id())->get();
+        return response()->json($articles);
+    }
+
     /**
      * Store a new article using JSONP to avoid CORS issues.
      * This endpoint is specifically for the bookmarklet.
