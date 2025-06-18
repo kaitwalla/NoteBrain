@@ -6,9 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Services\ArticleSummarizer;
 use App\Services\GoogleDriveService;
-use fivefilters\Readability\Configuration;
-use fivefilters\Readability\ParseException;
-use fivefilters\Readability\Readability;
 use Illuminate\Http\Request;
 
 class ArticleController extends Controller
@@ -120,77 +117,23 @@ class ArticleController extends Controller
         }
 
         $userId = auth()->id();
-        \Log::info('Creating article with user ID: ' . $userId);
 
-        // Fetch article metadata
-        $metadata = $this->fetchArticleMetadata($validated['url']);
+        $storeArticle = new \App\Actions\StoreArticle();
+        $result = $storeArticle($validated, $userId, $request->boolean('summarize'));
 
-        $article = new Article([
-            'url' => $validated['url'],
-            'status' => Article::STATUS_INBOX,
-            'user_id' => $userId,
-            'title' => $metadata['title'] ?? 'Untitled Article',
-            'content' => $metadata['content'] ?? '',
-            'author' => $metadata['author'] ?? null,
-            'site_name' => $metadata['site_name'] ?? null,
-            'featured_image' => $metadata['featured_image'] ?? null,
-            'excerpt' => $metadata['excerpt'] ?? null,
-        ]);
-
-        try {
-            $article->save();
-        } catch (\Exception $e) {
-            \Log::error('Failed to save article: ' . $e->getMessage());
-            \Log::error('User ID: ' . $userId);
+        if (!$result['success']) {
             return response()->json([
-                'message' => 'Failed to save article',
-                'error' => $e->getMessage(),
+                'message' => $result['message'],
+                'error' => $result['error'],
             ], 500);
         }
 
-        if ($request->boolean('summarize')) {
-            // Dispatch the job to summarize the article asynchronously
-            \App\Jobs\SummarizeArticle::dispatch($article);
-
-            // Update the summarized_at timestamp immediately
-            $article->update([
-                'summarized_at' => now(),
-            ]);
-        }
-
         return response()->json([
-            'message' => 'Article created successfully',
-            'article' => $article,
+            'message' => $result['message'],
+            'article' => $result['article'],
         ], 201);
     }
 
-    private function fetchArticleMetadata(string $url): array
-    {
-        try {
-            $html = file_get_contents($url);
-            if ($html === false) {
-                return [];
-            }
-
-            $readability = new Readability(new Configuration());
-            $readability->parse($html);
-
-            return [
-                'title' => $readability->getTitle(),
-                'content' => $readability->getContent(),
-                'author' => $readability->getAuthor(),
-                'site_name' => $readability->getSiteName(),
-                'featured_image' => $readability->getImage(),
-                'excerpt' => $readability->getExcerpt(),
-            ];
-        } catch (ParseException $e) {
-            \Log::error('Failed to parse article: ' . $e->getMessage());
-            return [];
-        } catch (\Exception $e) {
-            \Log::error('Failed to fetch article metadata: ' . $e->getMessage());
-            return [];
-        }
-    }
 
     /**
      * Summarize an article via JSONP for the bookmarklet.
@@ -268,46 +211,34 @@ class ArticleController extends Controller
 
     public function summarize(Article $article)
     {
-        if (!$article->summary) {
-            // Dispatch the job to summarize the article asynchronously
-            \App\Jobs\SummarizeArticle::dispatch($article);
-
-            // Update the summarized_at timestamp immediately
-            $article->update([
-                'summarized_at' => now(),
-            ]);
-        } else {
-            $article->update([
-                'summarized_at' => now(),
-            ]);
-        }
+        $summarizeArticle = new \App\Actions\SummarizeArticle();
+        $result = $summarizeArticle($article);
 
         return response()->json([
-            'message' => 'Article summarization started',
-            'article' => $article
+            'message' => $result['message'],
+            'article' => $result['article']
         ]);
     }
 
     public function keepUnread(Article $article)
     {
-        $article->update([
-            'status' => Article::STATUS_INBOX,
-            'read_at' => null,
-        ]);
+        $keepUnreadArticle = new \App\Actions\KeepUnreadArticle();
+        $result = $keepUnreadArticle($article);
 
         return response()->json([
-            'message' => 'Article kept unread',
-            'article' => $article
+            'message' => $result['message'],
+            'article' => $result['article']
         ]);
     }
 
     public function read(Article $article)
     {
-        $article->archive();
+        $readArticle = new \App\Actions\ReadArticle();
+        $result = $readArticle($article);
 
         return response()->json([
-            'message' => 'Article marked as read',
-            'article' => $article
+            'message' => $result['message'],
+            'article' => $result['article']
         ]);
     }
 
@@ -316,36 +247,18 @@ class ArticleController extends Controller
      */
     public function toggleStar(Article $article)
     {
-        try {
-            if ($article->starred) {
-                // If article is starred, unstar it
-                if ($article->google_drive_file_id) {
-                    $this->googleDriveService->deleteFile($article->google_drive_file_id);
-                    $article->update(['google_drive_file_id' => null]);
-                }
-                $article->unstar();
-                $message = 'Article unstarred successfully';
-            } else {
-                // If article is not starred, star it
-                $article->star();
-                if (!$article->google_drive_file_id) {
-                    $driveFileId = $this->googleDriveService->saveArticleText($article);
-                    if ($driveFileId) {
-                        $article->update(['google_drive_file_id' => $driveFileId]);
-                    }
-                }
-                $message = 'Article starred successfully';
-            }
+        $toggleStarArticle = app(\App\Actions\ToggleStarArticle::class);
+        $result = $toggleStarArticle($article);
 
+        if ($result['success']) {
             return response()->json([
-                'message' => $message,
-                'article' => $article
+                'message' => $result['message'],
+                'article' => $result['article']
             ]);
-        } catch (\Exception $e) {
-            \Log::error('Failed to toggle star status: ' . $e->getMessage());
+        } else {
             return response()->json([
-                'message' => 'Failed to toggle star status',
-                'error' => $e->getMessage(),
+                'message' => $result['message'],
+                'error' => $result['error'],
             ], 500);
         }
     }
