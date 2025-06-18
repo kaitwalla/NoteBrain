@@ -25,7 +25,7 @@ class ProfileController extends Controller
         }
 
         // Create or retrieve a token for the bookmarklet
-        $token = $user->tokens()->where('name', 'bookmarklet')->first()?->plainTextToken;
+        $token = $user->tokens()->first()?->plainTextToken;
         if (!$token) {
             $token = $user->createToken('bookmarklet')->plainTextToken;
         }
