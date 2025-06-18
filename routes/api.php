@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
 
     // Article routes
+    Route::get('/articles', [ArticleController::class, 'index']);
     Route::post('/articles', [ArticleController::class, 'store']);
     Route::post('/articles/{article}/keep-unread', [ArticleController::class, 'keepUnread']);
     Route::post('/articles/{article}/read', [ArticleController::class, 'read']);
