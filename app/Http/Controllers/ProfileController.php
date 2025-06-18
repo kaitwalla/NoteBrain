@@ -25,13 +25,13 @@ class ProfileController extends Controller
         }
 
         // Create or retrieve a token for the bookmarklet
-        $token = $user->tokens()->first()?->plainTextToken;
+        $token = $user->tokens()->first();
         if (!$token) {
             $token = $user->createToken('bookmarklet')->plainTextToken;
+            \Log::info('Generated bookmarklet token: ' . $token);
+        } else {
+            $token = $token->id . '|' . $token->token;
         }
-
-        // Debug the token
-        \Log::info('Generated bookmarklet token: ' . $token);
 
         return view('profile.edit', [
             'user' => $user,
