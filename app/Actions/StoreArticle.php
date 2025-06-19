@@ -24,8 +24,11 @@ class StoreArticle
         $fetchMetadata = new FetchArticleMetadata();
         $metadata = $fetchMetadata($data['url']);
 
+        // Even if metadata is empty, we'll still create the article with the URL
+        // This prevents failures when we can't fetch metadata but still have the URL
         if (empty($metadata)) {
-            throw new \Exception('Failed to fetch article metadata');
+            Log::warning('Failed to fetch article metadata for URL: ' . $data['url'] . '. Creating article with minimal information.');
+            $metadata = [];
         }
 
         $article = new Article([

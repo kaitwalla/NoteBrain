@@ -90,6 +90,13 @@ class ArticleController extends Controller
         $fetchMetadata = new \App\Actions\FetchArticleMetadata();
         $metadata = $fetchMetadata($url);
 
+        // Even if metadata is empty, we'll still create the article with the URL
+        // This prevents failures when we can't fetch metadata but still have the URL
+        if (empty($metadata)) {
+            \Log::warning('JSONP: Failed to fetch article metadata for URL: ' . $url . '. Creating article with minimal information.');
+            $metadata = [];
+        }
+
         // Create the article
         $article = new Article([
             'url' => $url,
