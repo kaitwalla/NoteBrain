@@ -181,7 +181,7 @@
                     // Construct the URL with query parameters
                     const jsonpUrl = url +
                         '?token=' + encodeURIComponent(token) +
-                        '&callback=' + callbackName;
+                        '&callback=window.' + callbackName;
 
                     script.src = jsonpUrl;
 
@@ -217,7 +217,7 @@
                 const jsonpUrl = '{{ url('/api/articles/jsonp') }}' +
                     '?url=' + encodeURIComponent(currentUrl) +
                     '&token=' + encodeURIComponent(token) +
-                    '&callback=noteBrainCallback';
+                    '&callback=window.noteBrainCallback';
 
                 script.src = jsonpUrl;
 
