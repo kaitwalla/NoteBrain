@@ -87,7 +87,8 @@ class ArticleController extends Controller
         auth()->login($user);
 
         // Fetch article metadata
-        $metadata = $this->fetchArticleMetadata($url);
+        $fetchMetadata = new \App\Actions\FetchArticleMetadata();
+        $metadata = $fetchMetadata($url);
 
         // Create the article
         $article = new Article([
