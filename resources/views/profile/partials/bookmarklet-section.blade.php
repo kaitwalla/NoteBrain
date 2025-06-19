@@ -79,7 +79,8 @@
                 });
 
                 // Define a callback function to handle the JSONP response
-                window.noteBrainCallback = function(data) {
+                // Define it directly on the global window object to ensure it's accessible from any scope
+                noteBrainCallback = function(data) {
                     // Clear the auto close timer
                     clearTimeout(autoCloseTimer);
 
@@ -135,7 +136,8 @@
                 };
 
                 // Define callback for star action
-                window.starCallback = function(data) {
+                // Define it directly on the global window object to ensure it's accessible from any scope
+                starCallback = function(data) {
                     const starBtn = document.getElementById('nb-star-btn');
                     if (data.error) {
                         starBtn.textContent = 'Failed to Star';
@@ -154,7 +156,8 @@
                 };
 
                 // Define callback for summarize action
-                window.summarizeCallback = function(data) {
+                // Define it directly on the global window object to ensure it's accessible from any scope
+                summarizeCallback = function(data) {
                     const summarizeBtn = document.getElementById('nb-summarize-btn');
                     if (data.error) {
                         summarizeBtn.textContent = 'Failed to Summarize';
@@ -181,15 +184,26 @@
                     // Construct the URL with query parameters
                     const jsonpUrl = url +
                         '?token=' + encodeURIComponent(token) +
-                        '&callback=window.' + callbackName;
+                        '&callback=' + callbackName;
 
                     script.src = jsonpUrl;
 
                     // Add error handling
                     script.onerror = function() {
-                        window[callbackName]({
-                            error: 'Request failed. Please try again.'
-                        });
+                        // Call the callback function directly without using window[]
+                        if (callbackName === 'noteBrainCallback') {
+                            noteBrainCallback({
+                                error: 'Request failed. Please try again.'
+                            });
+                        } else if (callbackName === 'starCallback') {
+                            starCallback({
+                                error: 'Request failed. Please try again.'
+                            });
+                        } else if (callbackName === 'summarizeCallback') {
+                            summarizeCallback({
+                                error: 'Request failed. Please try again.'
+                            });
+                        }
                     };
 
                     // Append the script to the document to start the request
@@ -198,11 +212,10 @@
 
                 // Handle errors by setting up a timeout
                 const jsonpTimeout = setTimeout(() => {
-                    if (window.noteBrainCallback) {
-                        window.noteBrainCallback({
-                            error: 'Request timed out. Please try again.'
-                        });
-                    }
+                    // Call the callback function directly
+                    noteBrainCallback({
+                        error: 'Request timed out. Please try again.'
+                    });
                 }, 10000);
 
                 // Make API call using JSONP to avoid CORS issues
@@ -217,14 +230,15 @@
                 const jsonpUrl = '{{ url('/api/articles/jsonp') }}' +
                     '?url=' + encodeURIComponent(currentUrl) +
                     '&token=' + encodeURIComponent(token) +
-                    '&callback=window.noteBrainCallback';
+                    '&callback=noteBrainCallback';
 
                 script.src = jsonpUrl;
 
                 // Add error handling
                 script.onerror = function() {
                     clearTimeout(jsonpTimeout);
-                    window.noteBrainCallback({
+                    // Call the callback function directly
+                    noteBrainCallback({
                         error: 'Failed to save article. Please try again.'
                     });
                 };
