@@ -9,6 +9,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class SummarizeArticle implements ShouldQueue
 {
@@ -40,12 +42,30 @@ class SummarizeArticle implements ShouldQueue
      */
     public function handle(ArticleSummarizer $summarizer)
     {
+        Log::info('Starting to summarize article', ['article_id' => $this->article->id]);
+
         // Update the article with the summary
         $summary = $summarizer->summarize($this->article);
 
         $this->article->update([
             'summarized_at' => now(),
             'summary' => $summary,
+        ]);
+
+        Log::info('Article summarization completed successfully', ['article_id' => $this->article->id]);
+    }
+
+    /**
+     * Handle a job failure.
+     *
+     * @param  \Throwable  $exception
+     * @return void
+     */
+    public function failed(Throwable $exception)
+    {
+        Log::error('Article summarization failed', [
+            'article_id' => $this->article->id,
+            'exception' => $exception->getMessage(),
         ]);
     }
 }
