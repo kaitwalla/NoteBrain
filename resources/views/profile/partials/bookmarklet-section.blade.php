@@ -77,103 +77,108 @@
                     clearTimeout(autoCloseTimer);
                     document.body.removeChild(modal);
                 });
+                if (!window.noteBrainCallback) {
+                    // Define a callback function to handle the JSONP response
+                    // Define it directly on the global window object to ensure it's accessible from any scope
+                    window.noteBrainCallback = function(data) {
+                        // Clear the auto close timer
+                        clearTimeout(autoCloseTimer);
 
-                // Define a callback function to handle the JSONP response
-                // Define it directly on the global window object to ensure it's accessible from any scope
-                noteBrainCallback = function(data) {
-                    // Clear the auto close timer
-                    clearTimeout(autoCloseTimer);
+                        if (data.error) {
+                            // Update the modal with error message
+                            document.getElementById('nb-status').style.display = 'none';
+                            const errorElement = document.getElementById('nb-error');
+                            errorElement.textContent = data.error;
+                            errorElement.style.display = 'block';
+                        } else {
+                            // Update the modal with success message
+                            document.getElementById('nb-status').style.display = 'none';
+                            document.getElementById('nb-result').style.display = 'block';
 
-                    if (data.error) {
-                        // Update the modal with error message
-                        document.getElementById('nb-status').style.display = 'none';
-                        const errorElement = document.getElementById('nb-error');
-                        errorElement.textContent = data.error;
-                        errorElement.style.display = 'block';
-                    } else {
-                        // Update the modal with success message
-                        document.getElementById('nb-status').style.display = 'none';
-                        document.getElementById('nb-result').style.display = 'block';
+                            // Set the view link
+                            const viewLink = document.getElementById('nb-view-link');
+                            viewLink.href = '{{ url('/articles') }}/' + data.article.id;
 
-                        // Set the view link
-                        const viewLink = document.getElementById('nb-view-link');
-                        viewLink.href = '{{ url('/articles') }}/' + data.article.id;
+                            // Store the article ID for star and summarize actions
+                            const articleId = data.article.id;
 
-                        // Store the article ID for star and summarize actions
-                        const articleId = data.article.id;
+                            // Add event listener for star button
+                            document.getElementById('nb-star-btn').addEventListener('click', function() {
+                                // Update button to show loading state
+                                this.textContent = 'Starring...';
+                                this.disabled = true;
 
-                        // Add event listener for star button
-                        document.getElementById('nb-star-btn').addEventListener('click', function() {
-                            // Update button to show loading state
-                            this.textContent = 'Starring...';
-                            this.disabled = true;
+                                // Make JSONP call to star the article
+                                makeJsonpRequest('{{ url('/api/articles') }}/' + articleId + '/star/jsonp', token, 'starCallback');
+                            });
 
-                            // Make JSONP call to star the article
-                            makeJsonpRequest('{{ url('/api/articles') }}/' + articleId + '/star/jsonp', token, 'starCallback');
-                        });
+                            // Add event listener for summarize button
+                            document.getElementById('nb-summarize-btn').addEventListener('click', function() {
+                                // Update button to show loading state
+                                this.textContent = 'Summarizing...';
+                                this.disabled = true;
 
-                        // Add event listener for summarize button
-                        document.getElementById('nb-summarize-btn').addEventListener('click', function() {
-                            // Update button to show loading state
-                            this.textContent = 'Summarizing...';
-                            this.disabled = true;
+                                // Make JSONP call to summarize the article
+                                makeJsonpRequest('{{ url('/api/articles') }}/' + articleId + '/summarize/jsonp', token, 'summarizeCallback');
+                            });
+                        }
 
-                            // Make JSONP call to summarize the article
-                            makeJsonpRequest('{{ url('/api/articles') }}/' + articleId + '/summarize/jsonp', token, 'summarizeCallback');
-                        });
-                    }
+                        // Set a new auto close timer - longer to allow for star/summarize actions
+                        autoCloseTimer = setTimeout(() => {
+                            document.body.removeChild(modal);
+                        }, 15000);
 
-                    // Set a new auto close timer - longer to allow for star/summarize actions
-                    autoCloseTimer = setTimeout(() => {
-                        document.body.removeChild(modal);
-                    }, 15000);
+                        // Clean up by removing the script tag
+                        const scriptElement = document.getElementById('notebrain-jsonp');
+                        if (scriptElement) {
+                            document.head.removeChild(scriptElement);
+                        }
+                    };
+                }
 
-                    // Clean up by removing the script tag
-                    const scriptElement = document.getElementById('notebrain-jsonp');
-                    if (scriptElement) {
-                        document.head.removeChild(scriptElement);
-                    }
-                };
+                if (!window.starCallback) {
+                    // Define callback for star action
+                    // Define it directly on the global window object to ensure it's accessible from any scope
+                    starCallback = function(data) {
+                        const starBtn = document.getElementById('nb-star-btn');
+                        if (data.error) {
+                            starBtn.textContent = 'Failed to Star';
+                            starBtn.style.backgroundColor = '#ef4444';
+                        } else {
+                            starBtn.textContent = 'Starred ★';
+                            starBtn.style.backgroundColor = '#10b981';
+                        }
+                        starBtn.disabled = false;
 
-                // Define callback for star action
-                // Define it directly on the global window object to ensure it's accessible from any scope
-                starCallback = function(data) {
-                    const starBtn = document.getElementById('nb-star-btn');
-                    if (data.error) {
-                        starBtn.textContent = 'Failed to Star';
-                        starBtn.style.backgroundColor = '#ef4444';
-                    } else {
-                        starBtn.textContent = 'Starred ★';
-                        starBtn.style.backgroundColor = '#10b981';
-                    }
-                    starBtn.disabled = false;
+                        // Clean up by removing the script tag
+                        const scriptElement = document.getElementById('notebrain-star-jsonp');
+                        if (scriptElement) {
+                            document.head.removeChild(scriptElement);
+                        }
+                    };
+                }
 
-                    // Clean up by removing the script tag
-                    const scriptElement = document.getElementById('notebrain-star-jsonp');
-                    if (scriptElement) {
-                        document.head.removeChild(scriptElement);
-                    }
-                };
+                if (!window.summarizeCallback) {
+                    // Define callback for summarize action
+                    // Define it directly on the global window object to ensure it's accessible from any scope
+                    summarizeCallback = function(data) {
+                        const summarizeBtn = document.getElementById('nb-summarize-btn');
+                        if (data.error) {
+                            summarizeBtn.textContent = 'Failed to Summarize';
+                            summarizeBtn.style.backgroundColor = '#ef4444';
+                        } else {
+                            summarizeBtn.textContent = 'Summarized ✓';
+                            summarizeBtn.style.backgroundColor = '#10b981';
+                        }
+                        summarizeBtn.disabled = false;
 
-                // Define callback for summarize action
-                // Define it directly on the global window object to ensure it's accessible from any scope
-                summarizeCallback = function(data) {
-                    const summarizeBtn = document.getElementById('nb-summarize-btn');
-                    if (data.error) {
-                        summarizeBtn.textContent = 'Failed to Summarize';
-                        summarizeBtn.style.backgroundColor = '#ef4444';
-                    } else {
-                        summarizeBtn.textContent = 'Summarized ✓';
-                        summarizeBtn.style.backgroundColor = '#10b981';
-                    }
-                    summarizeBtn.disabled = false;
-
-                    // Clean up by removing the script tag
-                    const scriptElement = document.getElementById('notebrain-summarize-jsonp');
-                    if (scriptElement) {
-                        document.head.removeChild(scriptElement);
-                    }
-                };
+                        // Clean up by removing the script tag
+                        const scriptElement = document.getElementById('notebrain-summarize-jsonp');
+                        if (scriptElement) {
+                            document.head.removeChild(scriptElement);
+                        }
+                    };
+                }
 
                 // Helper function to make JSONP requests
                 function makeJsonpRequest(url, token, callbackName) {
