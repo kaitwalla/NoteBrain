@@ -21,9 +21,29 @@ class ArticleController extends Controller
 
     public function listAll()
     {
-        $articles = Article::where('user_id', auth()->id())->get();
+        $articles = Article::where('user_id', auth()->id())->where('status', 'inbox')->get();
         return response()->json($articles);
     }
+
+    /**
+     * List archived articles with pagination.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function listArchived(Request $request)
+    {
+        $page = $request->input('page', 1);
+        $perPage = 20;
+
+        $articles = Article::where('user_id', auth()->id())
+            ->where('status', Article::STATUS_ARCHIVED)
+            ->orderBy('archived_at', 'desc')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json($articles);
+    }
+
 
     /**
      * Store a new article using JSONP to avoid CORS issues.
