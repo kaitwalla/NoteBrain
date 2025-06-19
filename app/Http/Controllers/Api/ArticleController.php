@@ -86,6 +86,18 @@ class ArticleController extends Controller
         // Set the authenticated user
         auth()->login($user);
 
+        // Check if article with this URL already exists for this user
+        $existingArticle = Article::where('user_id', $user->id)
+            ->where('url', $url)
+            ->first();
+
+        if ($existingArticle) {
+            return response()->json([
+                'error' => 'Article with this URL already exists',
+                'article' => $existingArticle
+            ])->setCallback($callback);
+        }
+
         // Fetch article metadata
         $fetchMetadata = new \App\Actions\FetchArticleMetadata();
         $metadata = $fetchMetadata($url);
@@ -95,6 +107,13 @@ class ArticleController extends Controller
         if (empty($metadata)) {
             \Log::warning('JSONP: Failed to fetch article metadata for URL: ' . $url . '. Creating article with minimal information.');
             $metadata = [];
+        }
+
+        // Check if content is blank
+        if (empty($metadata['content'])) {
+            return response()->json([
+                'error' => 'Cannot save article with blank content'
+            ])->setCallback($callback);
         }
 
         // Create the article
@@ -239,13 +258,20 @@ class ArticleController extends Controller
 
     public function summarize(Article $article)
     {
-        $summarizeArticle = new \App\Actions\SummarizeArticle();
+        $summarizeArticle = app(\App\Actions\SummarizeArticle::class);
         $result = $summarizeArticle($article);
 
-        return response()->json([
-            'message' => $result['message'],
-            'article' => $result['article']
-        ]);
+        if ($result['success']) {
+            return response()->json([
+                'message' => $result['message'],
+                'article' => $result['article']
+            ]);
+        } else {
+            return response()->json([
+                'message' => $result['message'],
+                'error' => $result['error'],
+            ], 500);
+        }
     }
 
     public function keepUnread(Article $article)
@@ -399,6 +425,27 @@ class ArticleController extends Controller
     {
         $starArticle = app(\App\Actions\StarArticle::class);
         $result = $starArticle($article);
+
+        if ($result['success']) {
+            return response()->json([
+                'message' => $result['message'],
+                'article' => $result['article']
+            ]);
+        } else {
+            return response()->json([
+                'message' => $result['message'],
+                'error' => $result['error'],
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete an article.
+     */
+    public function delete(Article $article)
+    {
+        $deleteArticle = app(\App\Actions\DeleteArticle::class);
+        $result = $deleteArticle($article);
 
         if ($result['success']) {
             return response()->json([

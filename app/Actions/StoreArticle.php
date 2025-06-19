@@ -20,6 +20,20 @@ class StoreArticle
     {
         Log::info('Creating article with user ID: ' . $userId);
 
+        // Check if article with this URL already exists for this user
+        $existingArticle = Article::where('user_id', $userId)
+            ->where('url', $data['url'])
+            ->first();
+
+        if ($existingArticle) {
+            return [
+                'success' => false,
+                'message' => 'Article with this URL already exists',
+                'error' => 'Duplicate URL',
+                'article' => $existingArticle
+            ];
+        }
+
         // Fetch article metadata
         $fetchMetadata = new FetchArticleMetadata();
         $metadata = $fetchMetadata($data['url']);
@@ -29,6 +43,16 @@ class StoreArticle
         if (empty($metadata)) {
             Log::warning('Failed to fetch article metadata for URL: ' . $data['url'] . '. Creating article with minimal information.');
             $metadata = [];
+        }
+
+        // Check if content is blank
+        if (empty($metadata['content'])) {
+            return [
+                'success' => false,
+                'message' => 'Cannot save article with blank content',
+                'error' => 'Blank content',
+                'article' => null
+            ];
         }
 
         $article = new Article([
