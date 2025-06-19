@@ -288,33 +288,39 @@ class ArticleController extends Controller
      */
     public function unstar(Article $article)
     {
-        try {
-            // Check if article is already unstarred
-            if (!$article->starred) {
-                return response()->json([
-                    'message' => 'Article already unstarred',
-                    'article' => $article
-                ]);
-            }
+        $unstarArticle = app(\App\Actions\UnstarArticle::class);
+        $result = $unstarArticle($article);
 
-            // If article has a Google Drive file ID, delete it from Google Drive
-            if ($article->google_drive_file_id) {
-                $this->googleDriveService->deleteFile($article->google_drive_file_id);
-                $article->update(['google_drive_file_id' => null]);
-            }
-
-            // Unstar the article
-            $article->unstar();
-
+        if ($result['success']) {
             return response()->json([
-                'message' => 'Article unstarred successfully',
-                'article' => $article
+                'message' => $result['message'],
+                'article' => $result['article']
             ]);
-        } catch (\Exception $e) {
-            \Log::error('Failed to unstar article: ' . $e->getMessage());
+        } else {
             return response()->json([
-                'message' => 'Failed to unstar article',
-                'error' => $e->getMessage(),
+                'message' => $result['message'],
+                'error' => $result['error'],
+            ], 500);
+        }
+    }
+
+    /**
+     * Archive an article.
+     */
+    public function archive(Article $article)
+    {
+        $archiveArticle = app(\App\Actions\ArchiveArticle::class);
+        $result = $archiveArticle($article);
+
+        if ($result['success']) {
+            return response()->json([
+                'message' => $result['message'],
+                'article' => $result['article']
+            ]);
+        } else {
+            return response()->json([
+                'message' => $result['message'],
+                'error' => $result['error'],
             ], 500);
         }
     }
@@ -365,70 +371,36 @@ class ArticleController extends Controller
             ])->setCallback($callback);
         }
 
-        try {
-            // Check if article is already starred
-            if ($article->starred) {
-                return response()->json([
-                    'message' => 'Article already starred',
-                    'article' => $article
-                ])->setCallback($callback);
-            }
+        $starArticle = app(\App\Actions\StarArticle::class);
+        $result = $starArticle($article);
 
-            // Star the article
-            $article->star();
-
-            // If article doesn't have a Google Drive file ID, save it to Google Drive
-            if (!$article->google_drive_file_id) {
-                $driveFileId = $this->googleDriveService->saveArticleText($article);
-                if ($driveFileId) {
-                    $article->update(['google_drive_file_id' => $driveFileId]);
-                }
-            }
-
+        if ($result['success']) {
             return response()->json([
-                'message' => 'Article starred successfully',
-                'article' => $article
+                'message' => $result['message'],
+                'article' => $result['article']
             ])->setCallback($callback);
-        } catch (\Exception $e) {
-            \Log::error('Failed to star article: ' . $e->getMessage());
+        } else {
             return response()->json([
-                'message' => 'Failed to star article',
-                'error' => $e->getMessage(),
+                'message' => $result['message'],
+                'error' => $result['error'],
             ])->setCallback($callback);
         }
     }
 
     public function star(Article $article)
     {
-        try {
-            // Check if article is already starred
-            if ($article->starred) {
-                return response()->json([
-                    'message' => 'Article already starred',
-                    'article' => $article
-                ]);
-            }
+        $starArticle = app(\App\Actions\StarArticle::class);
+        $result = $starArticle($article);
 
-            // Star the article
-            $article->star();
-
-            // If article doesn't have a Google Drive file ID, save it to Google Drive
-            if (!$article->google_drive_file_id) {
-                $driveFileId = $this->googleDriveService->saveArticleText($article);
-                if ($driveFileId) {
-                    $article->update(['google_drive_file_id' => $driveFileId]);
-                }
-            }
-
+        if ($result['success']) {
             return response()->json([
-                'message' => 'Article starred successfully',
-                'article' => $article
+                'message' => $result['message'],
+                'article' => $result['article']
             ]);
-        } catch (\Exception $e) {
-            \Log::error('Failed to star article: ' . $e->getMessage());
+        } else {
             return response()->json([
-                'message' => 'Failed to star article',
-                'error' => $e->getMessage(),
+                'message' => $result['message'],
+                'error' => $result['error'],
             ], 500);
         }
     }
