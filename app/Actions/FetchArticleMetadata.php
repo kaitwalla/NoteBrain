@@ -29,11 +29,22 @@ class FetchArticleMetadata
             $html = curl_exec($ch);
             $error = curl_error($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            // Get the final URL after redirects
+            $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
             curl_close($ch);
 
             if ($html === false || !empty($error) || $httpCode >= 400) {
                 Log::error("Failed to fetch URL: $url, Error: $error, HTTP Code: $httpCode");
                 return [];
+            }
+
+            // Log if there was a redirect
+            if ($finalUrl !== $url) {
+                Log::info('URL redirected', [
+                    'original_url' => $url,
+                    'final_url' => $finalUrl,
+                ]);
             }
 
             $readability = new Readability(new Configuration());
@@ -46,6 +57,7 @@ class FetchArticleMetadata
                 'site_name' => $readability->getSiteName(),
                 'featured_image' => $readability->getImage(),
                 'excerpt' => $readability->getExcerpt(),
+                'final_url' => $finalUrl, // Include the final URL after redirects
             ];
         } catch (ParseException $e) {
             Log::error('Failed to parse article: ' . $e->getMessage());

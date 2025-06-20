@@ -25,8 +25,8 @@ class SaveArticle
     public function __invoke(string $url, User $user): ?Article
     {
         try {
-            // Fetch the HTML content
-            $response = Http::get($url);
+            // Fetch the HTML content with redirect following
+            $response = Http::withOptions(['allow_redirects' => true])->get($url);
             if (!$response->successful()) {
                 Log::error('Failed to fetch article', [
                     'url' => $url,
@@ -35,13 +35,24 @@ class SaveArticle
                 return null;
             }
 
+            // Get the final URL after redirects
+            $finalUrl = $response->effectiveUri()->__toString();
+
+            // Log if there was a redirect
+            if ($finalUrl !== $url) {
+                Log::info('URL redirected', [
+                    'original_url' => $url,
+                    'final_url' => $finalUrl,
+                ]);
+            }
+
             $html = $response->body();
 
             // Configure Readability
             $configuration = new Configuration();
             $configuration
                 ->setFixRelativeURLs(true)
-                ->setOriginalURL($url)
+                ->setOriginalURL($finalUrl) // Use the final URL after redirects
                 ->setArticleByline(true)
                 ->setCleanConditionally(true);
 
@@ -52,13 +63,13 @@ class SaveArticle
             // Create the article
             $article = Article::create([
                 'user_id' => $user->id,
-                'url' => $url,
+                'url' => $finalUrl, // Use the final URL after redirects
                 'title' => $readability->getTitle(),
                 'content' => $readability->getContent(),
                 'excerpt' => $readability->getExcerpt(),
                 'featured_image' => $readability->getImage(),
                 'author' => $readability->getAuthor(),
-                'site_name' => parse_url($url, PHP_URL_HOST),
+                'site_name' => parse_url($finalUrl, PHP_URL_HOST), // Use the final URL for site name
                 'status' => 'inbox',
             ]);
 
@@ -86,7 +97,7 @@ class SaveArticle
     {
         // Find all image tags in the content
         preg_match_all('/<img[^>]+src="([^">]+)"/', $content, $matches);
-        
+
         if (empty($matches[1])) {
             return;
         }
@@ -113,7 +124,7 @@ class SaveArticle
                 // Generate a unique filename
                 $extension = Str::after($mimeType, 'image/');
                 $filename = 'articles/' . $article->id . '/' . Str::random(40) . '.' . $extension;
-                
+
                 // Store the image
                 Storage::disk('public')->put($filename, $response->body());
 
@@ -143,4 +154,4 @@ class SaveArticle
         // Save the updated content with local image URLs
         $article->save();
     }
-} 
+}

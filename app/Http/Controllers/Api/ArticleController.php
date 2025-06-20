@@ -274,6 +274,27 @@ class ArticleController extends Controller
         }
     }
 
+    /**
+     * Delete the summary of an article.
+     */
+    public function deleteSummary(Article $article)
+    {
+        $deleteArticleSummary = app(\App\Actions\DeleteArticleSummary::class);
+        $result = $deleteArticleSummary($article);
+
+        if ($result['success']) {
+            return response()->json([
+                'message' => $result['message'],
+                'article' => $result['article']
+            ]);
+        } else {
+            return response()->json([
+                'message' => $result['message'],
+                'error' => $result['error'] ?? null,
+            ], 500);
+        }
+    }
+
     public function keepUnread(Article $article)
     {
         $keepUnreadArticle = new \App\Actions\KeepUnreadArticle();

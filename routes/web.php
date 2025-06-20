@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/articles/{article}/inbox', [ArticleController::class, 'inbox'])->name('articles.inbox');
     Route::post('/articles/{article}/restore', [ArticleController::class, 'restore'])->name('articles.restore');
     Route::post('/articles/{article}/summarize', [ArticleController::class, 'summarize'])->name('articles.summarize');
+    Route::post('/articles/{article}/delete-summary', [ArticleController::class, 'deleteSummary'])->name('articles.delete-summary');
     Route::post('/articles/{article}/keep-unread', [ArticleController::class, 'keepUnread'])->name('articles.keep-unread');
     Route::post('/articles/{article}/toggle-star', [ArticleController::class, 'toggleStar'])->name('articles.toggle-star');
     Route::post('/articles/bulk-action', [ArticleController::class, 'bulkAction'])->name('articles.bulk-action');

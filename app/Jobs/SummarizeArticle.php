@@ -44,6 +44,12 @@ class SummarizeArticle implements ShouldQueue
     {
         Log::info('Starting to summarize article', ['article_id' => $this->article->id]);
 
+        // Check if the article already has a summary
+        if ($this->article->summary) {
+            Log::info('Article already has a summary, skipping', ['article_id' => $this->article->id]);
+            return;
+        }
+
         // Update the article with the summary
         $summary = $summarizer->summarize($this->article);
 

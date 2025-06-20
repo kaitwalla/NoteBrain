@@ -20,9 +20,23 @@ class StoreArticle
     {
         Log::info('Creating article with user ID: ' . $userId);
 
+        // Fetch article metadata to get the final URL after redirects
+        $fetchMetadata = new FetchArticleMetadata();
+        $metadata = $fetchMetadata($data['url']);
+
+        // Even if metadata is empty, we'll still create the article with the URL
+        // This prevents failures when we can't fetch metadata but still have the URL
+        if (empty($metadata)) {
+            Log::warning('Failed to fetch article metadata for URL: ' . $data['url'] . '. Creating article with minimal information.');
+            $metadata = [];
+        }
+
+        // Use the final URL after redirects if available, otherwise use the original URL
+        $finalUrl = $metadata['final_url'] ?? $data['url'];
+
         // Check if article with this URL already exists for this user
         $existingArticle = Article::where('user_id', $userId)
-            ->where('url', $data['url'])
+            ->where('url', $finalUrl)
             ->first();
 
         if ($existingArticle) {
@@ -32,17 +46,6 @@ class StoreArticle
                 'error' => 'Duplicate URL',
                 'article' => $existingArticle
             ];
-        }
-
-        // Fetch article metadata
-        $fetchMetadata = new FetchArticleMetadata();
-        $metadata = $fetchMetadata($data['url']);
-
-        // Even if metadata is empty, we'll still create the article with the URL
-        // This prevents failures when we can't fetch metadata but still have the URL
-        if (empty($metadata)) {
-            Log::warning('Failed to fetch article metadata for URL: ' . $data['url'] . '. Creating article with minimal information.');
-            $metadata = [];
         }
 
         // Check if content is blank
@@ -56,7 +59,7 @@ class StoreArticle
         }
 
         $article = new Article([
-            'url' => $data['url'],
+            'url' => $finalUrl,
             'status' => Article::STATUS_INBOX,
             'user_id' => $userId,
             'title' => $metadata['title'] ?? 'Untitled Article',

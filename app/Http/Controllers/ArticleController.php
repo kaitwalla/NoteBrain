@@ -105,6 +105,23 @@ class ArticleController extends Controller
     }
 
     /**
+     * Delete the summary of an article.
+     */
+    public function deleteSummary(Article $article)
+    {
+        $this->authorize('update', $article);
+
+        $deleteArticleSummary = new \App\Actions\DeleteArticleSummary();
+        $result = $deleteArticleSummary($article);
+
+        if ($result['success']) {
+            return redirect()->back()->with('success', $result['message']);
+        } else {
+            return redirect()->back()->with('error', $result['message']);
+        }
+    }
+
+    /**
      * Display the specified article.
      */
     public function show(Article $article)
