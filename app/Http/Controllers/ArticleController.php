@@ -98,10 +98,14 @@ class ArticleController extends Controller
 
     public function summarize(Article $article)
     {
-        $summarizeArticle = new \App\Actions\SummarizeArticle();
+        $summarizeArticle = app(\App\Actions\SummarizeArticle::class);
         $result = $summarizeArticle($article);
 
-        return redirect()->route('articles.index')->with('success', 'Article summarization started.');
+        if ($result['success']) {
+            return redirect()->route('articles.index')->with('success', $result['message']);
+        } else {
+            return redirect()->route('articles.index')->with('error', $result['message']);
+        }
     }
 
     /**

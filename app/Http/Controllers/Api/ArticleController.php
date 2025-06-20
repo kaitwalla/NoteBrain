@@ -230,12 +230,13 @@ class ArticleController extends Controller
 
         try {
             if (!$article->summary) {
-                // Dispatch the job to summarize the article asynchronously
-                \App\Jobs\SummarizeArticle::dispatch($article);
+                // Perform summarization synchronously
+                $summary = $this->summarizer->summarize($article);
 
-                // Update the summarized_at timestamp immediately
+                // Update the article with the summary
                 $article->update([
                     'summarized_at' => now(),
+                    'summary' => $summary,
                 ]);
             } else {
                 $article->update([
@@ -244,13 +245,13 @@ class ArticleController extends Controller
             }
 
             return response()->json([
-                'message' => 'Article summarization started',
+                'message' => 'Article summarized successfully',
                 'article' => $article
             ])->setCallback($callback);
         } catch (\Exception $e) {
-            \Log::error('Failed to start article summarization: ' . $e->getMessage());
+            \Log::error('Failed to summarize article: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Failed to start article summarization',
+                'message' => 'Failed to summarize article',
                 'error' => $e->getMessage(),
             ])->setCallback($callback);
         }

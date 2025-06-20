@@ -3,11 +3,24 @@
 namespace App\Actions;
 
 use App\Models\Article;
-use App\Jobs\SummarizeArticle as SummarizeArticleJob;
+use App\Services\ArticleSummarizer;
 use Illuminate\Support\Facades\Log;
 
 class SummarizeArticle
 {
+    protected $summarizer;
+
+    /**
+     * Create a new action instance.
+     *
+     * @param ArticleSummarizer $summarizer
+     * @return void
+     */
+    public function __construct(ArticleSummarizer $summarizer)
+    {
+        $this->summarizer = $summarizer;
+    }
+
     /**
      * Summarize an article.
      *
@@ -18,12 +31,13 @@ class SummarizeArticle
     {
         try {
             if (!$article->summary) {
-                // Dispatch the job to summarize the article asynchronously
-                SummarizeArticleJob::dispatch($article);
+                // Perform summarization synchronously
+                $summary = $this->summarizer->summarize($article);
 
-                // Update the summarized_at timestamp immediately
+                // Update the article with the summary
                 $article->update([
                     'summarized_at' => now(),
+                    'summary' => $summary,
                 ]);
             } else {
                 $article->update([
@@ -33,16 +47,16 @@ class SummarizeArticle
 
             return [
                 'success' => true,
-                'message' => 'Article summarization started',
+                'message' => 'Article summarized successfully',
                 'article' => $article,
                 'error' => null
             ];
         } catch (\Exception $e) {
-            Log::error('Failed to start article summarization: ' . $e->getMessage());
+            Log::error('Failed to summarize article: ' . $e->getMessage());
 
             return [
                 'success' => false,
-                'message' => 'Failed to start article summarization',
+                'message' => 'Failed to summarize article',
                 'error' => $e->getMessage(),
                 'article' => $article
             ];
