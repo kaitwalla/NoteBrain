@@ -49,6 +49,7 @@ class FetchArticleMetadata
 
             $readability = new Readability(new Configuration([
                 'FixRelativeURLs' => true,
+                'OriginalURL' => $finalUrl,
                 'ArticleByline' => true
             ]));
             $readability->parse($html);
