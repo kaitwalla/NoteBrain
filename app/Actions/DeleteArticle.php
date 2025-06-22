@@ -15,9 +15,7 @@ class DeleteArticle
     public function __invoke(Article $article): array
     {
         try {
-            $article->update([
-                'status' => Article::STATUS_DELETED,
-            ]);
+            $article->delete();
 
             return [
                 'success' => true,
