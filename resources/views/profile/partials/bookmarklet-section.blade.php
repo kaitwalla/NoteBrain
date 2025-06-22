@@ -24,11 +24,70 @@
             </a>
             <span class="ml-3 text-sm text-gray-600">← Drag this to your bookmarks bar</span>
         </div>
+
+        <div class="mt-6">
+            <h3 class="text-md font-medium text-gray-900">{{ __('API Token') }}</h3>
+            <p class="mt-1 mb-3 text-sm text-gray-600">
+                {{ __("Your API token for accessing NoteBrain programmatically. Keep this secure.") }}
+            </p>
+            <div class="flex items-center">
+                <div class="relative flex-grow">
+                    <input type="text"
+                           id="api-token"
+                           value="{{ $bookmarkletToken }}"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50"
+                           readonly>
+                </div>
+                <button type="button"
+                        id="copy-token-btn"
+                        class="ml-3 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Copy
+                </button>
+                <a href="{{ route('profile.edit', ['new_token' => true]) }}"
+                   class="ml-3 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                    Regenerate
+                </a>
+            </div>
+            <p id="copy-message" class="mt-2 text-sm text-green-600 hidden">Token copied to clipboard!</p>
+        </div>
     </div>
 
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+                // Add event listener for the copy token button
+                const copyTokenBtn = document.getElementById('copy-token-btn');
+                const apiToken = document.getElementById('api-token');
+                const copyMessage = document.getElementById('copy-message');
+
+                if (copyTokenBtn && apiToken) {
+                    copyTokenBtn.addEventListener('click', function() {
+                        // Select the text in the input
+                        apiToken.select();
+                        apiToken.setSelectionRange(0, 99999); // For mobile devices
+
+                        // Copy the text to the clipboard
+                        navigator.clipboard.writeText(apiToken.value)
+                            .then(() => {
+                                // Show the success message
+                                copyMessage.classList.remove('hidden');
+
+                                // Hide the message after 3 seconds
+                                setTimeout(() => {
+                                    copyMessage.classList.add('hidden');
+                                }, 3000);
+                            })
+                            .catch(err => {
+                                console.error('Failed to copy text: ', err);
+                                // Fallback for older browsers
+                                document.execCommand('copy');
+                                copyMessage.classList.remove('hidden');
+                                setTimeout(() => {
+                                    copyMessage.classList.add('hidden');
+                                }, 3000);
+                            });
+                    });
+                }
                 console.log('Bookmarklet token:', '{{ $bookmarkletToken }}');
                 // Generate the bookmarklet code
                 const bookmarkletCode = `javascript:(function(){
