@@ -47,7 +47,10 @@ class FetchArticleMetadata
                 ]);
             }
 
-            $readability = new Readability(new Configuration());
+            $readability = new Readability(new Configuration([
+                'FixRelativeURLs' => true,
+                'ArticleByline' => true
+            ]));
             $readability->parse($html);
 
             return [
