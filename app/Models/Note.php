@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\HtmlToJsonConverter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Note extends Model
 {
     use HasFactory;
+
+    /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::saving(function ($note) {
+            // Convert HTML content to JSON array on save
+            $htmlConverter = app(HtmlToJsonConverter::class);
+
+            // Only convert if the content has changed or content_json is null
+            if ($note->isDirty('content') || is_null($note->content_json)) {
+                $note->content_json = $htmlConverter->convert($note->content);
+            }
+        });
+    }
 
     const STATUS_INBOX = 'inbox';
     const STATUS_ARCHIVED = 'archived';
@@ -23,6 +42,7 @@ class Note extends Model
     protected $fillable = [
         'title',
         'content',
+        'content_json',
         'status',
         'starred',
         'archived_at',
@@ -40,6 +60,7 @@ class Note extends Model
         'updated_at' => 'datetime',
         'archived_at' => 'datetime',
         'starred' => 'boolean',
+        'content_json' => 'array',
     ];
 
     /**

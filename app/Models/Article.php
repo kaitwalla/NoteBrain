@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\HtmlToJsonConverter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,34 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Article extends Model
 {
     use HasFactory;
+
+    /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::saving(function ($article) {
+            // Convert HTML content to JSON arrays on save
+            $htmlConverter = app(HtmlToJsonConverter::class);
+
+            // Only convert if the content has changed or content_json is null
+            if ($article->isDirty('content') || is_null($article->content_json)) {
+                $article->content_json = $htmlConverter->convert($article->content);
+            }
+
+            // Only convert if the excerpt has changed or excerpt_json is null
+            if ($article->isDirty('excerpt') || is_null($article->excerpt_json)) {
+                $article->excerpt_json = $htmlConverter->convert($article->excerpt);
+            }
+
+            // Only convert if the summary has changed or summary_json is null
+            if ($article->isDirty('summary') || is_null($article->summary_json)) {
+                $article->summary_json = $htmlConverter->convert($article->summary);
+            }
+        });
+    }
 
     const STATUS_INBOX = 'inbox';
     const STATUS_ARCHIVED = 'archived';
@@ -24,6 +53,7 @@ class Article extends Model
     protected $fillable = [
         'title',
         'content',
+        'content_json',
         'url',
         'status',
         'starred',
@@ -31,8 +61,10 @@ class Article extends Model
         'site_name',
         'featured_image',
         'excerpt',
+        'excerpt_json',
         'google_drive_file_id',
         'summary',
+        'summary_json',
         'summarized_at',
         'read_at',
         'archived_at',
@@ -48,6 +80,9 @@ class Article extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'starred' => 'boolean',
+        'content_json' => 'array',
+        'excerpt_json' => 'array',
+        'summary_json' => 'array',
     ];
 
     /**

@@ -4,10 +4,17 @@ namespace App\Actions;
 
 use App\Models\Article;
 use App\Jobs\SummarizeArticle as SummarizeArticleJob;
+use App\Services\HtmlToJsonConverter;
 use Illuminate\Support\Facades\Log;
 
 class StoreArticle
 {
+    protected $htmlConverter;
+
+    public function __construct(HtmlToJsonConverter $htmlConverter)
+    {
+        $this->htmlConverter = $htmlConverter;
+    }
     /**
      * Store a new article.
      *
@@ -58,16 +65,22 @@ class StoreArticle
             ];
         }
 
+        // Convert HTML content to JSON arrays
+        $content = $metadata['content'] ?? '';
+        $excerpt = $metadata['excerpt'] ?? null;
+
         $article = new Article([
             'url' => $finalUrl,
             'status' => Article::STATUS_INBOX,
             'user_id' => $userId,
             'title' => $metadata['title'] ?? 'Untitled Article',
-            'content' => $metadata['content'] ?? '',
+            'content' => $content,
+            'content_json' => $this->htmlConverter->convert($content),
             'author' => $metadata['author'] ?? null,
             'site_name' => $metadata['site_name'] ?? null,
             'featured_image' => $metadata['featured_image'] ?? null,
-            'excerpt' => $metadata['excerpt'] ?? null,
+            'excerpt' => $excerpt,
+            'excerpt_json' => $this->htmlConverter->convert($excerpt),
         ]);
 
         try {
