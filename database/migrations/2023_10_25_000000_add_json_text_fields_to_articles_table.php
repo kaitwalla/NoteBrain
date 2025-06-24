@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Article;
-use App\Services\HtmlToJsonConverter;
+use App\Services\HtmlToMarkdownConverter;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,8 +19,8 @@ return new class extends Migration
             $table->json('summary_json')->nullable()->after('summary');
         });
 
-        // Convert existing articles' HTML content to JSON
-        $htmlConverter = new HtmlToJsonConverter();
+        // Convert existing articles' HTML content to Markdown
+        $htmlConverter = new HtmlToMarkdownConverter();
         $articles = Article::all();
 
         foreach ($articles as $article) {

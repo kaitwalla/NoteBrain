@@ -4,14 +4,10 @@ namespace App\Services;
 
 use League\HTMLToMarkdown\HtmlConverter;
 
-class HtmlToJsonConverter
+class HtmlToMarkdownConverter
 {
     /**
      * Convert HTML content to Markdown.
-     *
-     * Note: This class has been updated to return Markdown content instead of a JSON array.
-     * The method signature remains the same for backward compatibility, but the return type
-     * is now a string (Markdown) instead of an array.
      *
      * @param string|null $html The HTML content to convert
      * @return string|null The Markdown content or null if the input is null

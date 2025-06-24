@@ -4,15 +4,15 @@ namespace Tests\Feature;
 
 use App\Models\Article;
 use App\Models\User;
-use App\Services\HtmlToJsonConverter;
+use App\Services\HtmlToMarkdownConverter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class HtmlToJsonConversionTest extends TestCase
+class HtmlToMarkdownConversionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_html_to_json_conversion_on_article_save()
+    public function test_html_to_markdown_conversion_on_article_save()
     {
         // Create a user
         $user = User::factory()->create();
@@ -38,7 +38,7 @@ class HtmlToJsonConversionTest extends TestCase
         $this->assertStringContainsString('This is a test excerpt.', $article->excerpt_json);
     }
 
-    public function test_html_to_json_conversion_on_article_update()
+    public function test_html_to_markdown_conversion_on_article_update()
     {
         // Create a user
         $user = User::factory()->create();
@@ -67,7 +67,7 @@ class HtmlToJsonConversionTest extends TestCase
         $this->assertStringContainsString('New paragraph.', $article->content_json);
     }
 
-    public function test_html_to_json_conversion_with_complex_html()
+    public function test_html_to_markdown_conversion_with_complex_html()
     {
         // Create a user
         $user = User::factory()->create();

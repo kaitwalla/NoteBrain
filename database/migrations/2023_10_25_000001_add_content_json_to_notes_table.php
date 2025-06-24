@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Note;
-use App\Services\HtmlToJsonConverter;
+use App\Services\HtmlToMarkdownConverter;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,8 +17,8 @@ return new class extends Migration
             $table->json('content_json')->nullable()->after('content');
         });
 
-        // Convert existing notes' HTML content to JSON
-        $htmlConverter = new HtmlToJsonConverter();
+        // Convert existing notes' HTML content to Markdown
+        $htmlConverter = new HtmlToMarkdownConverter();
         $notes = Note::all();
 
         foreach ($notes as $note) {

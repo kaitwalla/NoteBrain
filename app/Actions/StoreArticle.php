@@ -4,14 +4,14 @@ namespace App\Actions;
 
 use App\Models\Article;
 use App\Jobs\SummarizeArticle as SummarizeArticleJob;
-use App\Services\HtmlToJsonConverter;
+use App\Services\HtmlToMarkdownConverter;
 use Illuminate\Support\Facades\Log;
 
 class StoreArticle
 {
     protected $htmlConverter;
 
-    public function __construct(HtmlToJsonConverter $htmlConverter)
+    public function __construct(HtmlToMarkdownConverter $htmlConverter)
     {
         $this->htmlConverter = $htmlConverter;
     }
@@ -65,7 +65,7 @@ class StoreArticle
             ];
         }
 
-        // Convert HTML content to JSON arrays
+        // Convert HTML content to Markdown
         $content = $metadata['content'] ?? '';
         $excerpt = $metadata['excerpt'] ?? null;
 

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Services\HtmlToJsonConverter;
+use App\Services\HtmlToMarkdownConverter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,8 +21,8 @@ class Article extends Model
     protected static function booted()
     {
         static::saving(function ($article) {
-            // Convert HTML content to JSON arrays on save
-            $htmlConverter = app(HtmlToJsonConverter::class);
+            // Convert HTML content to Markdown on save
+            $htmlConverter = app(HtmlToMarkdownConverter::class);
 
             // Only convert if the content has changed or content_json is null
             if ($article->isDirty('content') || is_null($article->content_json)) {
@@ -80,9 +80,9 @@ class Article extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'starred' => 'boolean',
-        'content_json' => 'array',
-        'excerpt_json' => 'array',
-        'summary_json' => 'array',
+        'content_json' => 'string',
+        'excerpt_json' => 'string',
+        'summary_json' => 'string',
     ];
 
     /**

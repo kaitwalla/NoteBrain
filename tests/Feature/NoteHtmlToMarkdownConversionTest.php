@@ -4,15 +4,15 @@ namespace Tests\Feature;
 
 use App\Models\Note;
 use App\Models\User;
-use App\Services\HtmlToJsonConverter;
+use App\Services\HtmlToMarkdownConverter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class NoteHtmlToJsonConversionTest extends TestCase
+class NoteHtmlToMarkdownConversionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_html_to_json_conversion_on_note_save()
+    public function test_html_to_markdown_conversion_on_note_save()
     {
         // Create a user
         $user = User::factory()->create();
@@ -32,7 +32,7 @@ class NoteHtmlToJsonConversionTest extends TestCase
         $this->assertStringContainsString('This is another paragraph.', $note->content_json);
     }
 
-    public function test_html_to_json_conversion_on_note_update()
+    public function test_html_to_markdown_conversion_on_note_update()
     {
         // Create a user
         $user = User::factory()->create();
@@ -60,7 +60,7 @@ class NoteHtmlToJsonConversionTest extends TestCase
         $this->assertStringContainsString('New paragraph.', $note->content_json);
     }
 
-    public function test_html_to_json_conversion_with_complex_html()
+    public function test_html_to_markdown_conversion_with_complex_html()
     {
         // Create a user
         $user = User::factory()->create();

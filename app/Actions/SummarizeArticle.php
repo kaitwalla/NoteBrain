@@ -4,7 +4,7 @@ namespace App\Actions;
 
 use App\Models\Article;
 use App\Services\ArticleSummarizer;
-use App\Services\HtmlToJsonConverter;
+use App\Services\HtmlToMarkdownConverter;
 use Illuminate\Support\Facades\Log;
 
 class SummarizeArticle
@@ -16,10 +16,10 @@ class SummarizeArticle
      * Create a new action instance.
      *
      * @param ArticleSummarizer $summarizer
-     * @param HtmlToJsonConverter $htmlConverter
+     * @param HtmlToMarkdownConverter $htmlConverter
      * @return void
      */
-    public function __construct(ArticleSummarizer $summarizer, HtmlToJsonConverter $htmlConverter)
+    public function __construct(ArticleSummarizer $summarizer, HtmlToMarkdownConverter $htmlConverter)
     {
         $this->summarizer = $summarizer;
         $this->htmlConverter = $htmlConverter;
@@ -38,22 +38,22 @@ class SummarizeArticle
                 // Perform summarization synchronously
                 $summary = $this->summarizer->summarize($article);
 
-                // Convert summary HTML to JSON
-                $summaryJson = $this->htmlConverter->convert($summary);
+                // Convert summary HTML to Markdown
+                $summaryMarkdown = $this->htmlConverter->convert($summary);
 
-                // Update the article with the summary and its JSON representation
+                // Update the article with the summary and its Markdown representation
                 $article->update([
                     'summarized_at' => now(),
                     'summary' => $summary,
-                    'summary_json' => $summaryJson,
+                    'summary_json' => $summaryMarkdown,
                 ]);
             } else {
-                // If the article already has a summary but no JSON representation, create it
+                // If the article already has a summary but no Markdown representation, create it
                 if (!$article->summary_json) {
-                    $summaryJson = $this->htmlConverter->convert($article->summary);
+                    $summaryMarkdown = $this->htmlConverter->convert($article->summary);
                     $article->update([
                         'summarized_at' => now(),
-                        'summary_json' => $summaryJson,
+                        'summary_json' => $summaryMarkdown,
                     ]);
                 } else {
                     $article->update([
