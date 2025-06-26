@@ -36,8 +36,8 @@ class AuthController extends Controller
         // Revoke all existing tokens for this device
         $user->tokens()->where('name', $request->device_name)->delete();
 
-        // Create a new token that never expires by setting a far future expiration date
-        $token = $user->createToken($request->device_name, ['*'], now()->addYears(100));
+        // Create a new token that expires in 10 years (within timestamp limits)
+        $token = $user->createToken($request->device_name, ['*'], now()->addYears(10));
 
         return response()->json([
             'token' => $token->plainTextToken,

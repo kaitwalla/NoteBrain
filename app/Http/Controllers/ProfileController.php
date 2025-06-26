@@ -36,8 +36,8 @@ class ProfileController extends Controller
             // First, delete any existing bookmarklet tokens to avoid accumulating too many
             $user->tokens()->where('name', 'bookmarklet')->delete();
 
-            // Create a fresh token that will work with Sanctum's findToken method (set to expire in 100 years)
-            $token = $user->createToken('bookmarklet', ['*'], now()->addYears(100))->plainTextToken;
+            // Create a fresh token that will work with Sanctum's findToken method (set to expire in 10 years)
+            $token = $user->createToken('bookmarklet', ['*'], now()->addYears(10))->plainTextToken;
 
             // Store the token in the session for future use
             session(['bookmarklet_token' => $token]);
