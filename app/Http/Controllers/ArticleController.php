@@ -73,7 +73,7 @@ class ArticleController extends Controller
 
         $userId = auth()->id();
 
-        $storeArticle = new \App\Actions\StoreArticle();
+        $storeArticle = app(\App\Actions\StoreArticle::class);
         $result = $storeArticle($validated, $userId, $request->boolean('summarize'));
 
         if (!$result['success']) {
