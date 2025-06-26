@@ -75,12 +75,12 @@ class StoreArticle
             'user_id' => $userId,
             'title' => $metadata['title'] ?? 'Untitled Article',
             'content' => $content,
-            'content_json' => $this->htmlConverter->convert($content),
+            'content_markdown' => $this->htmlConverter->convert($content),
             'author' => $metadata['author'] ?? null,
             'site_name' => $metadata['site_name'] ?? null,
             'featured_image' => $metadata['featured_image'] ?? null,
             'excerpt' => $excerpt,
-            'excerpt_json' => $this->htmlConverter->convert($excerpt),
+            'excerpt_markdown' => $this->htmlConverter->convert($excerpt),
         ]);
 
         try {

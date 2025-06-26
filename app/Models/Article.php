@@ -24,19 +24,19 @@ class Article extends Model
             // Convert HTML content to Markdown on save
             $htmlConverter = app(HtmlToMarkdownConverter::class);
 
-            // Only convert if the content has changed or content_json is null
-            if ($article->isDirty('content') || is_null($article->content_json)) {
-                $article->content_json = $htmlConverter->convert($article->content);
+            // Only convert if the content has changed or content_markdown is null
+            if ($article->isDirty('content') || is_null($article->content_markdown)) {
+                $article->content_markdown = $htmlConverter->convert($article->content);
             }
 
-            // Only convert if the excerpt has changed or excerpt_json is null
-            if ($article->isDirty('excerpt') || is_null($article->excerpt_json)) {
-                $article->excerpt_json = $htmlConverter->convert($article->excerpt);
+            // Only convert if the excerpt has changed or excerpt_markdown is null
+            if ($article->isDirty('excerpt') || is_null($article->excerpt_markdown)) {
+                $article->excerpt_markdown = $htmlConverter->convert($article->excerpt);
             }
 
-            // Only convert if the summary has changed or summary_json is null
-            if ($article->isDirty('summary') || is_null($article->summary_json)) {
-                $article->summary_json = $htmlConverter->convert($article->summary);
+            // Only convert if the summary has changed or summary_markdown is null
+            if ($article->isDirty('summary') || is_null($article->summary_markdown)) {
+                $article->summary_markdown = $htmlConverter->convert($article->summary);
             }
         });
     }
@@ -53,7 +53,7 @@ class Article extends Model
     protected $fillable = [
         'title',
         'content',
-        'content_json',
+        'content_markdown',
         'url',
         'status',
         'starred',
@@ -61,10 +61,10 @@ class Article extends Model
         'site_name',
         'featured_image',
         'excerpt',
-        'excerpt_json',
+        'excerpt_markdown',
         'google_drive_file_id',
         'summary',
-        'summary_json',
+        'summary_markdown',
         'summarized_at',
         'read_at',
         'archived_at',
@@ -80,9 +80,9 @@ class Article extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'starred' => 'boolean',
-        'content_json' => 'string',
-        'excerpt_json' => 'string',
-        'summary_json' => 'string',
+        'content_markdown' => 'string',
+        'excerpt_markdown' => 'string',
+        'summary_markdown' => 'string',
     ];
 
     /**

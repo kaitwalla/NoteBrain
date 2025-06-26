@@ -23,9 +23,9 @@ class Note extends Model
             // Convert HTML content to Markdown on save
             $htmlConverter = app(HtmlToMarkdownConverter::class);
 
-            // Only convert if the content has changed or content_json is null
-            if ($note->isDirty('content') || is_null($note->content_json)) {
-                $note->content_json = $htmlConverter->convert($note->content);
+            // Only convert if the content has changed or content_markdown is null
+            if ($note->isDirty('content') || is_null($note->content_markdown)) {
+                $note->content_markdown = $htmlConverter->convert($note->content);
             }
         });
     }
@@ -42,7 +42,7 @@ class Note extends Model
     protected $fillable = [
         'title',
         'content',
-        'content_json',
+        'content_markdown',
         'status',
         'starred',
         'archived_at',
@@ -60,7 +60,7 @@ class Note extends Model
         'updated_at' => 'datetime',
         'archived_at' => 'datetime',
         'starred' => 'boolean',
-        'content_json' => 'string',
+        'content_markdown' => 'string',
     ];
 
     /**

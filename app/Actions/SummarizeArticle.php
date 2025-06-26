@@ -45,15 +45,15 @@ class SummarizeArticle
                 $article->update([
                     'summarized_at' => now(),
                     'summary' => $summary,
-                    'summary_json' => $summaryMarkdown,
+                    'summary_markdown' => $summaryMarkdown,
                 ]);
             } else {
                 // If the article already has a summary but no Markdown representation, create it
-                if (!$article->summary_json) {
+                if (!$article->summary_markdown) {
                     $summaryMarkdown = $this->htmlConverter->convert($article->summary);
                     $article->update([
                         'summarized_at' => now(),
-                        'summary_json' => $summaryMarkdown,
+                        'summary_markdown' => $summaryMarkdown,
                     ]);
                 } else {
                     $article->update([

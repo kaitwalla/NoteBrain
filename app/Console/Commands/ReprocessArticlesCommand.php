@@ -36,19 +36,19 @@ class ReprocessArticlesCommand extends Command
         $bar->start();
 
         foreach ($articles as $article) {
-            // Update content_json
+            // Update content_markdown
             if ($article->content) {
-                $article->content_json = $htmlConverter->convert($article->content);
+                $article->content_markdown = $htmlConverter->convert($article->content);
             }
 
-            // Update excerpt_json
+            // Update excerpt_markdown
             if ($article->excerpt) {
-                $article->excerpt_json = $htmlConverter->convert($article->excerpt);
+                $article->excerpt_markdown = $htmlConverter->convert($article->excerpt);
             }
 
-            // Update summary_json
+            // Update summary_markdown
             if ($article->summary) {
-                $article->summary_json = $htmlConverter->convert($article->summary);
+                $article->summary_markdown = $htmlConverter->convert($article->summary);
             }
 
             // Save without triggering the model's saving event
