@@ -5,6 +5,10 @@ namespace Tests\Unit\Services;
 use App\Services\HtmlToJsonConverter;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ */
 class HtmlToJsonConverterTest extends TestCase
 {
     /** @test */
@@ -99,5 +103,29 @@ class HtmlToJsonConverterTest extends TestCase
         $this->assertStringContainsString('* List item 2', $result);
         $this->assertStringContainsString('Third paragraph.', $result);
         $this->assertStringContainsString('Fourth paragraph.', $result);
+    }
+    /** @test */
+    public function it_handles_blockquotes_and_formatted_text()
+    {
+        $converter = new HtmlToJsonConverter();
+
+        $html = '
+            <h1>Article Title</h1>
+            <p>This is the first paragraph with <strong>bold</strong> and <em>italic</em> text.</p>
+            <ul>
+                <li>List item 1</li>
+                <li>List item 2</li>
+            </ul>
+            <blockquote>This is a quote.</blockquote>
+        ';
+
+        $result = $converter->convert($html);
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('# Article Title', $result);
+        $this->assertStringContainsString('This is the first paragraph with **bold** and _italic_ text.', $result);
+        $this->assertStringContainsString('* List item 1', $result);
+        $this->assertStringContainsString('* List item 2', $result);
+        $this->assertStringContainsString('> This is a quote.', $result);
     }
 }
